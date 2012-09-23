@@ -4,14 +4,23 @@ Kaggle Census competition
 
 import math
 
+import numpy as np
 import pandas 
 import sklearn.linear_model as sklm
+from sklearn.cross_validation import KFold
 
 import census_utilities 
 
-
+#try unpickling:
+try:
+    data = pandas.load( "census_data.pickle")
 #open training_file
-data = pandas.read_csv( "training_filev1.csv")
+except:
+
+    data = pandas.read_csv( "training_filev1.csv")
+    data.save(  "census_data.pickle" )
+    
+print "Data in."
 response = data['Mail_Return_Rate_CEN_2010']
 weights = data['weight']
 
@@ -26,35 +35,50 @@ data = census_utilities.preprocess_dataframe( data )
 
 n, d = data.shape
 
-#split the data into two. Replace this with cross-validation eventually.
-training_data = data[ :math.floor( 0.8*n) ]
-training_response = response[ :math.floor( 0.8*n) ]
+#split the data into CV sets. 
+K = 5
+kf = KFold( len(response), K , indices = False) 
+print kf
 
-test_data = data[ math.floor( 0.8*n):]
-test_response = response[ math.floor( 0.8*n): ]
+cv_scores = np.empty( K )
+i = 1
+for train, test in kf:
 
-training_weights = weights[:math.floor( 0.8*n) ]
-testing_weights = weights[ math.floor( 0.8*n): ]
+    training_data = data[ train]
+    training_response = response[ train ]
+    
+    testing_data = data[ test ]
+    testing_response = response[test]
+
+    testing_weights = weights[ test ]
+    training_weights = weights[ train ]
 
 
 
-#fit a linear model
-print "Create a linear model."
-lr = sklm.LinearRegression( normalize = True )
-lr.fit( training_data, training_response )
+    #fit a linear model
+    lr = sklm.Lasso( alpha = 5 )
+    lr.fit( training_data, training_response )
+    prediction = lr.predict( testing_data )
+    
+    
+    cv_scores[i-1] = census_utilities.WMAEscore( prediction, testing_response, testing_weights ) 
+    print "%d Cross validation: %f" %(i, cv_scores[i-1] )
+    i+=1
+    
+print "Accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
 
-prediction = lr.predict( test_data )
 
-print "Cross validation: %f" %census_utilities.WMAEscore( prediction, test_response, testing_weights )
+
+
 
 
 #open the testing file
-test_data = pandas.read_csv( "testing_filev1.csv")
-test_data = census_utilities.preprocess_dataframe( test_data )
+#test_data = pandas.read_csv( "testing_filev1.csv")
+#test_data = census_utilities.preprocess_dataframe( test_data )
 
 
-lr.fit( data, response )
-lr.predict( test_data)
+#lr.fit( data, response )
+#lr.predict( test_data)
 
 
 
