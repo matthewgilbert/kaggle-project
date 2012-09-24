@@ -11,14 +11,18 @@ from sklearn.cross_validation import KFold
 
 import census_utilities 
 
+
+
+
+training_file = "census_data_sample.csv"
 #try unpickling:
 try:
-    data = pandas.load( "census_data.pickle")
+    data = pandas.load( "../"+training_file.split(".")[0]+".pickle")
 #open training_file
 except:
 
-    data = pandas.read_csv( "training_filev1.csv")
-    data.save(  "census_data.pickle" )
+    data = pandas.read_csv( "../"+training_file)
+    data.save(  "../"+training_file.split(".")[0]+".pickle" )
     
 print "Data in."
 response = data['Mail_Return_Rate_CEN_2010']
@@ -56,10 +60,10 @@ for train, test in kf:
 
 
     #fit a linear model
-    lr = sklm.Lasso( alpha = 5 )
+    lr = sklm.Lasso(normalize=True,alpha = 1)
     lr.fit( training_data, training_response )
     prediction = lr.predict( testing_data )
-    
+    #prediction = 100*np.random.rand( len( testing_response ) ), 33 acc. rate
     
     cv_scores[i-1] = census_utilities.WMAEscore( prediction, testing_response, testing_weights ) 
     print "%d Cross validation: %f" %(i, cv_scores[i-1] )
