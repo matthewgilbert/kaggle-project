@@ -45,3 +45,41 @@ def preprocess_dataframe( dataframe ):
     dataframe.fillna( method="ffill", inplace=True)
     
     return dataframe
+    
+
+    
+def cv( model, data, response, K=5):
+    """
+    model is the scikitlearn model, with parameters already set.
+    """
+    kf = KFold( len(response), K , indices = False) 
+    print kf
+
+    cv_scores = np.empty( K )
+    i = 1
+    for train, test in kf:
+
+        training_data = data[ train]
+        training_response = response[ train ]
+        
+        testing_data = data[ test ]
+        testing_response = response[test]
+
+        testing_weights = weights[ test ]
+        training_weights = weights[ train ]
+
+
+
+        model.fit( training_data, training_response )
+        prediction = model.predict( testing_data )
+        
+        
+        cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
+        print "%d Cross validation: %f" %(i, cv_scores[i-1] )
+        i+=1
+        
+    print "Accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
+
+
+
+    
