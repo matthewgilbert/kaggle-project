@@ -105,6 +105,13 @@ def find_long_lat( id ):
     except:
         return [ np.NaN, np.NaN ]
         
+        
+def find_geo_NN( lat, long, location_data ):
+    #location_data is a 2-d nx2 numpy array of lat-long coordinates.
+    v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
+    return np.argmin( v[v>0] )
+    
 
+    
 
     
