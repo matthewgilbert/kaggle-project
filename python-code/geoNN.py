@@ -92,5 +92,28 @@ class GeoNN( object ):
         return prediction
                 
         
-                
+
+class GeoNNFinder( object ):
+    """
+    This class implements a way to find the nearest geographic neighbours.
+    
+    GeoNNFinder( location_data)
+        location_data: a pandas 2d array of location and longtitude
+        
+    methods:
+        
+        find( lat, long, k)
+     
+     
+
+     """
+    def __init__(self, location_data ):
+        self.location_data_ = location_data
+        
+    
+    def find(self, lat, long, k):
+        
+        return census_utilities.find_geo_NN( lat, long, self.location_data_, k )
+
+       
         
