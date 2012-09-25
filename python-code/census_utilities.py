@@ -1,7 +1,7 @@
 """
 census_utlities.py
 """
-
+import numpy as np
 
 
 def money2float(s):
@@ -50,7 +50,8 @@ def preprocess_dataframe( dataframe ):
     
 def cv( model, data, response, K=5):
     """
-    model is the scikitlearn model, with parameters already set.
+    model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
+    cv'ed set, there is no good way.
     """
     kf = KFold( len(response), K , indices = False) 
     print kf
@@ -80,6 +81,26 @@ def cv( model, data, response, K=5):
         
     print "Accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
 
+
+    
+def find_long_lat( id ):
+    """
+    id is some GIDBG.
+    return the (long, lat) Important, they are stringss
+    """
+    id = str(id)
+    try:
+        v = location_data[ location_data[ :,0] == id ]
+    except:
+        global location_data
+        location_data =np.genfromtxt("../CEN2010Edited.csv", delimiter=",", skip_header=1, dtype="str")
+        #make it global.
+        v = location_data[ location_data[ :,0] == id ]
+    try:
+        return ( v[0,2], v[0,3] )
+    except:
+        print "Could not find %s"%id
+        
 
 
     
