@@ -9,11 +9,11 @@ import pandas
 import sklearn.linear_model as sklm
 
 import census_utilities 
+import geoNN
 
 
 
-
-training_file = "sample_data_plus_location.csv"
+training_file = "training_file_plus_location.csv"
 #try unpickling:
 try:
     data = pandas.load( "../"+training_file.split(".")[0]+".pickle")
