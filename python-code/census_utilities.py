@@ -2,7 +2,7 @@
 census_utlities.py
 """
 import numpy as np
-
+import pandas
 
 def money2float(s):
    #Converts "$XXX, YYY" to XXXYYY
@@ -24,7 +24,7 @@ def preprocess_dataframe( dataframe ):
     """
 
     to_remove = ['Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
-             'County', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight']
+             'County', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE']
     for to_rm in to_remove:
         try:
             del dataframe[to_rm]
@@ -40,6 +40,10 @@ def preprocess_dataframe( dataframe ):
         dataframe[to_cn] = dataframe[to_cn].map( money2float )
         
 
+    #how much of the data is missing?
+    print "Proportion of missing data: %f."%( float( pandas.isnull( dataframe ).sum().sum() )/(dataframe.shape[0]*dataframe.shape[1])
+        
+        
     #do a naive filling of missing data
     dataframe.fillna( method="bfill", inplace=True)
     dataframe.fillna( method="ffill", inplace=True)
@@ -97,9 +101,9 @@ def find_long_lat( id ):
         #make it global.
         v = location_data[ location_data[ :,0] == id ]
     try:
-        return ( v[0,2], v[0,3] )
+        return [ v[0,2], v[0,3] ]
     except:
-        print "Could not find %s"%id
+        return [ np.NaN, np.NaN ]
         
 
 
