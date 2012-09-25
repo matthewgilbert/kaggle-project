@@ -13,7 +13,7 @@ import census_utilities
 
 
 
-training_file = "census_data_sample.csv"
+training_file = "sample_data_plus_location.csv"
 #try unpickling:
 try:
     data = pandas.load( "../"+training_file.split(".")[0]+".pickle")
@@ -26,7 +26,7 @@ except:
 print "Data in."
 response = data['Mail_Return_Rate_CEN_2010']
 weights = data['weight']
-
+location_data = data[ ['LATITUDE','LONGITUDE'] ]
 
 
 

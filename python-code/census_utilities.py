@@ -3,6 +3,9 @@ census_utlities.py
 """
 import numpy as np
 import pandas
+from sklearn.cross_validation import KFold
+
+
 
 def money2float(s):
    #Converts "$XXX, YYY" to XXXYYY
@@ -41,7 +44,7 @@ def preprocess_dataframe( dataframe ):
         
 
     #how much of the data is missing?
-    print "Proportion of missing data: %f."%( float( pandas.isnull( dataframe ).sum().sum() )/(dataframe.shape[0]*dataframe.shape[1])
+    print "Proportion of missing data: %f."%( float( pandas.isnull( dataframe ).sum().sum() )/(dataframe.shape[0]*dataframe.shape[1]) )
         
         
     #do a naive filling of missing data
@@ -52,7 +55,7 @@ def preprocess_dataframe( dataframe ):
     
 
     
-def cv( model, data, response, K=5):
+def cv( model, data, response, weights, K=5):
     """
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
@@ -61,6 +64,7 @@ def cv( model, data, response, K=5):
     print kf
 
     cv_scores = np.empty( K )
+    training_scores = np.empty( K) 
     i = 1
     for train, test in kf:
 
@@ -78,13 +82,13 @@ def cv( model, data, response, K=5):
         model.fit( training_data, training_response )
         prediction = model.predict( testing_data )
         
-        
+        training_scores[i-1] = WMAEscore( model.predict( training_data), training_response, training_weights)
         cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
-        print "%d Cross validation: %f" %(i, cv_scores[i-1] )
         i+=1
         
-    print "Accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
+    print "Test accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
 
+    print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
 
     
 def find_long_lat( id ):
@@ -106,10 +110,11 @@ def find_long_lat( id ):
         return [ np.NaN, np.NaN ]
         
         
-def find_geo_NN( lat, long, location_data ):
+def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
     v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
-    return np.argmin( v[v>0] )
+    v.sort()
+    return v.index[1:K+1]
     
 
     
