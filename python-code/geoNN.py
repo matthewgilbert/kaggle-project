@@ -82,8 +82,8 @@ class GeoNN( object ):
                 else:
                     knn_+=1
                     prediction[i] = self.knn_agg( nn_responses)
-                    if response:
-                        sum_knn_ += abs( response[i] - prediction[i] )
+                    
+                    sum_knn_ += abs( response[i] - prediction[i] )
 	
         print "Prediction complete, using %d geo-nn, and agg function %s. "%(self.K, self.knn_agg)
         print "There were %d missing locations, accounting for %f of the response."%( missing_location, float(missing_location)/n )
