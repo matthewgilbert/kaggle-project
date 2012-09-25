@@ -7,7 +7,6 @@ import math
 import numpy as np
 import pandas 
 import sklearn.linear_model as sklm
-from sklearn.cross_validation import KFold
 
 import census_utilities 
 
@@ -41,7 +40,6 @@ n, d = data.shape
 
 
 
-print help(census_utilities.cv)
 
 
 
