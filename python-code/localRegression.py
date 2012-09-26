@@ -19,17 +19,15 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, regressor = LinearRegression ):
+    def __init__(self, k = 200, regressor = LinearRegression, params=None ):
         self.k = k
         self.regressor = regressor
-        self.global_regressor_ = self.regressor()
         
     def fit(self, data, response, location_data):
         self.data_ = data
         self.response_ = response
         self.location_data_ = location_data
-        
-        self.global_regressor_.fit( data, response)
+        self.params = params
         
         self.gnn = geoNN.GeoNNFinder( location_data)
         
@@ -47,17 +45,13 @@ class LocalRegression( object ):
         predition = np.empty( n)
         for i in range(n):
             location = location_data.values[i,:]
-            if np.isnan( location ).any():
-                #use global regression
-                prediction[i] = self.global_regressor.predict( data.values[i,:] )
-                
-            else:
-                #gather k near data.
-                inx = self.gnn.find( location[0], location[1], self.k )
-                sub_data = data.values[inx,:]
-                sub_response = response.values[inx,:]
-                reg = self.regressor()
-                reg.fit( sub_data, sub_response )
-                prediction[i] = reg.predict( data.values[i,:] )
+
+            #gather k near data.
+            inx = self.gnn.find( location[0], location[1], self.k )
+            sub_data = data.values[inx,:]
+            sub_response = response.values[inx,:]
+            reg = self.regressor(*self.params)
+            reg.fit( sub_data, sub_response )
+            prediction[i] = reg.predict( data.values[i,:] )
                 
                 
