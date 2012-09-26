@@ -7,14 +7,13 @@ import math
 import numpy as np
 import pandas 
 import sklearn.linear_model as sklm
-from sklearn.cross_validation import KFold
 
 import census_utilities 
+import geoNN
 
 
 
-
-training_file = "census_data_sample.csv"
+training_file = "training_file_plus_location.csv"
 #try unpickling:
 try:
     data = pandas.load( "../"+training_file.split(".")[0]+".pickle")
@@ -27,7 +26,7 @@ except:
 print "Data in."
 response = data['Mail_Return_Rate_CEN_2010']
 weights = data['weight']
-
+location_data = data[ ['LATITUDE','LONGITUDE'] ]
 
 
 
@@ -41,7 +40,6 @@ n, d = data.shape
 
 
 
-print help(census_utilities.cv)
 
 
 

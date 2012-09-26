@@ -89,7 +89,7 @@ class Supervised_PCA(BaseEstimator, TransformerMixin):
         self.fit( X,Y)
         return self._transform()
         
-    def _transform(self)
+    def _transform(self):
         
         return self.X_fit.dot(self.alphas_)
 
@@ -125,7 +125,7 @@ class Supervised_PCA(BaseEstimator, TransformerMixin):
         elif eigen_solver == 'arpack':
             self.lambdas_, self.alphas_ = eigsh(M, n_components,
                                                 which="LA",
-                                                tol=self.tol,
+                                                tol=self.tol)
         
         #sort the eigenvalues in descending order
         indices = self.lambdas_.argsort()[::-1]
@@ -137,7 +137,7 @@ class Supervised_PCA(BaseEstimator, TransformerMixin):
         self.lambdas_ = self.lambdas_[ self.lambdas_ > 0 ]
         
         
-        self.X_fit_ = X;
+        self.X_fit = X;
         
         
     def _get_kernel(self, X, Y=None):
