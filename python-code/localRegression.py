@@ -31,7 +31,7 @@ class LocalRegression( object ):
         
         self.global_regressor_.fit( data, response)
         
-        self.gnn = geoNN.GeoFinder( location_data)
+        self.gnn = geoNN.GeoNNFinder( location_data)
         
         return self
         
