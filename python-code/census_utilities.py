@@ -34,14 +34,20 @@ def preprocess_dataframe( dataframe ):
         except:
             pass
 
+    for col_name in dataframe.columns:
+	if "MOE" in col_name:
+		del dataframe[col_name] 
+    
         
     to_convert_to_float = ['Med_HHD_Inc_BG_ACS_06_10', 'Med_HHD_Inc_BG_ACSMOE_06_10', 'Med_HHD_Inc_TR_ACS_06_10', 'Med_HHD_Inc_TR_ACSMOE_06_10',
      'Aggregate_HH_INC_ACS_06_10', 'Aggregate_HH_INC_ACSMOE_06_10', 'Med_House_Val_BG_ACS_06_10','Med_House_Val_BG_ACSMOE_06_10','Med_house_val_tr_ACS_06_10',
     'Med_house_val_tr_ACSMOE_06_10', 'Aggr_House_Value_ACS_06_10', 'Aggr_House_Value_ACSMOE_06_10']
 
     for to_cn in to_convert_to_float:
-        dataframe[to_cn] = dataframe[to_cn].map( money2float )
-        
+       try:
+         dataframe[to_cn] = dataframe[to_cn].map( money2float )
+       except:
+	 pass 
 
     #how much of the data is missing?
     print "Proportion of missing data: %f."%( float( pandas.isnull( dataframe ).sum().sum() )/(dataframe.shape[0]*dataframe.shape[1]) )
