@@ -8,8 +8,9 @@ import numpy as np
 import pandas 
 import sklearn.linear_model as sklm
 from census_utilities import *
-import geoNN
 
+import geoNN
+import localRegression as lclR
 
 
 training_file = "training_file_plus_location.csv"

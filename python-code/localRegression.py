@@ -45,9 +45,10 @@ class LocalRegression( object ):
         data = data.values
 	reg = self.regressor(*self.params)
         prediction = np.empty( n)
-	location = location.values
-        for i in range(n):	
-	    print i
+	location_data = location_data.values
+        for i in range(n):
+	    if i%100 == 0:
+		print i	
             location = location_data[i,:] #this can be changed 
             inx = self.gnn.find( location[0], location[1], self.k )
             sub_data = self.data_[inx,:]

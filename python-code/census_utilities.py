@@ -61,7 +61,7 @@ def preprocess_dataframe( dataframe ):
     
 
     
-def cv( model, data, response, weights, K=5):
+def cv( model, data, response, weights, K=5, location_data = [], report_training=True):
     """
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
@@ -77,24 +77,45 @@ def cv( model, data, response, weights, K=5):
         training_data = data[ train]
         training_response = response[ train ]
         
-        testing_data = data[ test ]
+        testing_data = data[test]
         testing_response = response[test]
 
         testing_weights = weights[ test ]
         training_weights = weights[ train ]
 
+	if location_data is not []:
+		training_location = [ location_data[train] ]
+		testing_location = [ location_data[test] ]
+
+	else:
+		training_location = []
+		testing_location = []
+
+	fit_args = [ training_data, training_response] + training_location
+	predict_args = [ testing_data ] + testing_location	
 
 
-        model.fit( training_data, training_response )
-        prediction = model.predict( testing_data )
-        
-        training_scores[i-1] = WMAEscore( model.predict( training_data), training_response, training_weights)
+        model.fit( *fit_args )
+        prediction = model.predict( *predict_args )
+
         cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
-        i+=1
+	
+	print "CV %d"%(i-1)
+	print "Test acc: %f"%cv_scores[i-1]
         
-    print "Test accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
+	if report_training:
 
-    print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
+		predict_args = [ training_data] + training_location        
+        	training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response, training_weights)
+		print "Train acc: %f"%training_scores[i-1]
+		print "--------------------------------"
+        
+        i += 1 
+
+    print "Test accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
+    
+    if report_training:
+	print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
 
     
         
@@ -102,8 +123,8 @@ def cv( model, data, response, weights, K=5):
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
     v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
-    ix = bn.argpartsort( v, K+1,axis=None)
-    return ix[1:K+1]
+    ix = bn.argpartsort( v, K,axis=None)
+    return ix[:K]
     
 
     
