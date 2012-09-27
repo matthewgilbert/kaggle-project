@@ -4,7 +4,7 @@ census_utlities.py
 import numpy as np
 import pandas
 from sklearn.cross_validation import KFold
-
+import bottleneck as bn
 
 
 def money2float(s):
@@ -97,30 +97,13 @@ def cv( model, data, response, weights, K=5):
     print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
 
     
-def find_long_lat( id ):
-    """
-    id is some GIDBG.
-    return the (long, lat) Important, they are stringss
-    """
-    id = str(id)
-    try:
-        v = location_data[ location_data[ :,0] == id ]
-    except:
-        global location_data
-        location_data =np.genfromtxt("../CEN2010Edited.csv", delimiter=",", skip_header=1, dtype="str")
-        #make it global.
-        v = location_data[ location_data[ :,0] == id ]
-    try:
-        return [ v[0,2], v[0,3] ]
-    except:
-        return [ np.NaN, np.NaN ]
         
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
     v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
-    v.sort()
-    return v.index[1:K+1]
+    ix = bn.argpartsort( v, K+1,axis=None)
+    return ix[1:K+1]
     
 
     

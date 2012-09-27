@@ -7,8 +7,7 @@ import math
 import numpy as np
 import pandas 
 import sklearn.linear_model as sklm
-
-import census_utilities 
+from census_utilities import *
 import geoNN
 
 
@@ -32,15 +31,15 @@ location_data = data[ ['LATITUDE','LONGITUDE'] ]
 
 
 #preprocess data.
-data = census_utilities.preprocess_dataframe( data )
-"Data cleaned. TODO: check cleaning algos"
+data = preprocess_dataframe( data )
+print "Data cleaned. TODO: check cleaning algos"
 #Ok data is pretty clean, what can we do with it?
 
 n, d = data.shape
 
+m = 3*n/4
 
-
-
+N = 1000
 
 
 

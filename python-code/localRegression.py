@@ -1,4 +1,4 @@
-
+import time
 
 import pandas
 import numpy as np
@@ -19,18 +19,18 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, regressor = LinearRegression, params=None ):
+    def __init__(self, k = 200, regressor = LinearRegression, params=[] ):
         self.k = k
         self.regressor = regressor
-        
+	self.params = params    
+    
     def fit(self, data, response, location_data):
-        self.data_ = data
-        self.response_ = response
-        self.location_data_ = location_data
-        self.params = params
+        self.data_ = data.values
+        self.response_ = response.values
+        self.location_data_ = location_data.values
         
         
-	self.gnn = geoNN.GeoNNFinder( location_data)
+	self.gnn = geoNN.GeoNNFinder( location_data.values)
         
         return self
         
@@ -42,16 +42,17 @@ class LocalRegression( object ):
             raise Exception("length of first argument does not equal length of second argument.")
         
         n = location_data.shape[0]
-        
+        data = data.values
+	reg = self.regressor(*self.params)
         prediction = np.empty( n)
+	location = location.values
         for i in range(n):	
 	    print i
-            location = location_data.values[i,:]
+            location = location_data[i,:] #this can be changed 
             inx = self.gnn.find( location[0], location[1], self.k )
-            sub_data = data.values[inx,:]
-            sub_response = response.values[inx,:]
-            reg = self.regressor(*self.params)
+            sub_data = self.data_[inx,:]
+            sub_response = self.response_[inx,:]
             reg.fit( sub_data, sub_response )
-            prediction[i] = reg.predict( data.values[i,:] )
-                
+            prediction[i] = reg.predict( data[i,:] )
+	return prediction                
                 
