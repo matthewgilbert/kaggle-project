@@ -61,13 +61,19 @@ def preprocess_dataframe( dataframe ):
     
 
     
-def cv( model, data, response, weights, K=5, location_data = [], report_training=True):
+def cv( model, data, response, weights, K=5, location_data = [], report_training=True, output=None):
     """
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
     """
-    kf = KFold( len(response), K , indices = False) 
+    if output != None:
+	import sys
+	sys.stdout = open( output, 'w')
+
+
+    kf = KFold( len(response), K , shuffle = True, indices = False) 
     print kf
+    print model
 
     cv_scores = np.empty( K )
     training_scores = np.empty( K) 
@@ -100,15 +106,15 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
 
         cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
 	
-	print "CV %d"%(i-1)
-	print "Test acc: %f"%cv_scores[i-1]
+	print "CV %d: Test Acc: %0.2f (+/- %0.2f)"%(i, cv_scores[:i].mean(), cv_scores[:i].std()/2)
         
 	if report_training:
 
 		predict_args = [ training_data] + training_location        
         	training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response, training_weights)
-		print "Train acc: %f"%training_scores[i-1]
-		print "--------------------------------"
+		print "CV %d: Train Acc: %0.2f (+/- %0.2f)"%(i, training_scores[:i].mean(), training_scores[:i].std()/2)
+        
+	print "--------------------------------"
         
         i += 1 
 
@@ -122,8 +128,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
-    v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
-    ix = bn.argpartsort( v, K,axis=None)
+    ix = bn.argpartsort( ((location_data - np.array( [lat,long] ) )**2).sum(axis=1), K,axis=None)
     return ix[:K]
     
 

@@ -19,14 +19,18 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, regressor = LinearRegression, params=[] ):
+    def __init__(self, k = 200, regressor = LinearRegression, params={} ):
         self.k = k
         self.regressor = regressor
 	self.params = params    
     
     def fit(self, data, response, location_data):
-        self.data_ = data.values
-        self.response_ = response.values
+        try:
+		#incase I pass in a numpy array or pandas df
+		self.data_ = data.values
+        except:
+		self.data_ = data
+	self.response_ = response.values
         self.location_data_ = location_data.values
         
         
@@ -42,18 +46,19 @@ class LocalRegression( object ):
             raise Exception("length of first argument does not equal length of second argument.")
         
         n = location_data.shape[0]
-        data = data.values
-	reg = self.regressor(*self.params)
+        try:
+		data = data.values
+	except:
+		pass
+	reg = self.regressor(**self.params)
         prediction = np.empty( n)
 	location_data = location_data.values
         for i in range(n):
-	    if i%100 == 0:
-		print i	
-            location = location_data[i,:] #this can be changed 
+	    #if i%100 == 0:
+	    #	print i	
+            location = location_data[i,:] 
             inx = self.gnn.find( location[0], location[1], self.k )
-            sub_data = self.data_[inx,:]
-            sub_response = self.response_[inx,:]
-            reg.fit( sub_data, sub_response )
+            reg.fit( self.data_[inx,:] , self.response_[inx,:] )
             prediction[i] = reg.predict( data[i,:] )
 	return prediction                
                 
