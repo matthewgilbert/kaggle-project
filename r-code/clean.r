@@ -46,6 +46,10 @@ acs_index = intersect(grep("ACS",names(census.formatted.df)), unformatted_index)
 acs_pop_index = acs_index[(acs_index <= 49)]
 acs_house_index = setdiff(acs_index, acs_pop_index)
 
+no_pop_index = which(census.formatted.df[,acs_totalPop_index] == 0)
+keep = setdiff(1:nrow(census.formatted.df), no_pop_index)
+census.formatted.df = census.formatted.df[keep,]
+
 census.formatted.df[,acs_pop_index] = census.formatted.df[,acs_pop_index] / census.formatted.df[,acs_totalPop_index]
 unformatted_index = setdiff(unformatted_index,acs_pop_index)
 
@@ -65,5 +69,5 @@ nonACS_pop_index = unformatted_index
 census.formatted.df[,nonACS_pop_index] = census.formatted.df[,nonACS_pop_index] / census.formatted.df[,totalPop_index]
 
 save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
-
+write.table(census.formatted.df,"formattedData")
 
