@@ -18,19 +18,39 @@ def money2float(s):
 def WMAEscore( prediction, response, weights):
     return abs( weights*(prediction-response) ).sum()/weights.sum()
     
-    
+ 
 
-def preprocess_dataframe( dataframe ):
+ 
+def generate_features( dataframe ):
+
+    #population density
+    dataframe['Population Density'] = dataframe['Tot_Population_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
+    
+    
+    
+    
+    return dataframe
+ 
+ 
+
+def preprocess_dataframe( dataframe, location_data ):
     """
     Use this to preprocess crossvalidation data and testing data.
     
     """
     
-    del dataframe[ dataframe.columns[168] ]
-    del dataframe[ dataframe.columns[169] ]
+    dataframe = generate_features( dataframe )
     
-    to_remove = ['Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
+    
+    #some data points are giving us problems, lets delete them. 
+    ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
+    dataframe.drop( ix )
+    location_data.drop( ix )
+    
+    
+    to_remove = ['TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
              'County', 'LAND_AREA', 'AIAN_LAND', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE', 'MailBack_Area_Count_CEN_2010']
+             
     for to_rm in to_remove:
         try:
             del dataframe[to_rm]
@@ -38,8 +58,6 @@ def preprocess_dataframe( dataframe ):
             pass
 
     for col_name in dataframe.columns:
-
-
         if "MOE" in col_name:
             del dataframe[col_name] 
             
@@ -69,7 +87,7 @@ def preprocess_dataframe( dataframe ):
         
     
     
-    return transform_data( dataframe )
+    return transform_data( dataframe ), location_data
 
     
 def transform_data( dataframe ):
@@ -105,10 +123,11 @@ def transform_data( dataframe ):
     
     for category in acs_populations_to_normalize:
         dataframe[category] = dataframe[category]/acs_population
-    
+        dataframe.rename( columns = { column: column + "/" + 'Tot_Population_ACS_06_10' }, inplace = True )
+        
     del dataframe['Tot_Population_ACS_06_10']  
               
-#denominator is Tot_Occp_Units_ACS_06_10
+    #denominator is Tot_Occp_Units_ACS_06_10
     acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
                 "NG_VW_SPAN_ACS_06_10",
@@ -143,6 +162,7 @@ def transform_data( dataframe ):
 
     for catagory in acs_households_to_normalize:
         dataframe[category] = dataframe[category]/acs_households
+        dataframe.rename( columns = { column: column + "/" + "Tot_Occp_Units_ACS_06_10" }, inplace = True )
 
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
@@ -150,6 +170,9 @@ def transform_data( dataframe ):
     #census
     census_population = dataframe['Tot_Population_CEN_2010'].astype(np.float64)
     census_pop_to_normalize = [
+        'URBANIZED_AREA_POP_CEN_2010',
+        'URBAN_CLUSTER_POP_CEN_2010',
+        'RURAL_POP_CEN_2010',
         'Males_CEN_2010',
         'Females_CEN_2010',
         'Pop_under_5_CEN_2010', 
@@ -171,6 +194,8 @@ def transform_data( dataframe ):
         
     for category in census_pop_to_normalize:
         dataframe[category] = dataframe[category]/census_population
+        dataframe.rename( columns = { column: column + "/" + 'Tot_Population_CEN_2010' }, inplace = True )
+
     del dataframe['Tot_Population_CEN_2010']     
         
     census_households = dataframe['Tot_Occp_Units_CEN_2010'].astype(np.float64)
@@ -190,12 +215,13 @@ def transform_data( dataframe ):
     
     for category in census_hhd_to_normalize:
         dataframe[catagory] = dataframe[category] / census_households
-        
+        dataframe.rename( columns = { column: column + "/" + 'Tot_Occp_Units_CEN_2010' }, inplace = True )
+
     del dataframe['Tot_Occp_Units_CEN_2010']
-    #for some reason, 0 are NAs, so we will just make them zeros explicitly
+    #for some reason, there are some places that just suck at reporting good data.
     dataframe.fillna( 0, inplace = True )    
     
-    return dataframe
+    return dataframe, location_data
 
 
 
