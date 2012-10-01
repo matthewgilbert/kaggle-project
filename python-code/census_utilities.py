@@ -25,9 +25,12 @@ def preprocess_dataframe( dataframe ):
     Use this to preprocess crossvalidation data and testing data.
     
     """
-
+    
+    del dataframe[ dataframe.columns[168] ]
+    del dataframe[ dataframe.columns[169] ]
+    
     to_remove = ['Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
-             'County', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE']
+             'County', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE', 'MailBack_Area_Count_CEN_2010']
     for to_rm in to_remove:
         try:
             del dataframe[to_rm]
@@ -35,9 +38,13 @@ def preprocess_dataframe( dataframe ):
             pass
 
     for col_name in dataframe.columns:
-	if "MOE" in col_name:
-		del dataframe[col_name] 
-    
+
+
+        if "MOE" in col_name:
+            del dataframe[col_name] 
+            
+        
+            
         
     to_convert_to_float = ['Med_HHD_Inc_BG_ACS_06_10', 'Med_HHD_Inc_BG_ACSMOE_06_10', 'Med_HHD_Inc_TR_ACS_06_10', 'Med_HHD_Inc_TR_ACSMOE_06_10',
      'Aggregate_HH_INC_ACS_06_10', 'Aggregate_HH_INC_ACSMOE_06_10', 'Med_House_Val_BG_ACS_06_10','Med_House_Val_BG_ACSMOE_06_10','Med_house_val_tr_ACS_06_10',
@@ -49,31 +56,156 @@ def preprocess_dataframe( dataframe ):
        except:
 	 pass 
 
+     
+    for col_name in dataframe.columns:
+        #impute here too
+        #do a naive filling of missing data
+        dataframe[col_name].fillna( value=dataframe[col_name].mean(), inplace=True )
+
+     
     #how much of the data is missing?
     print "Proportion of missing data: %f."%( float( pandas.isnull( dataframe ).sum().sum() )/(dataframe.shape[0]*dataframe.shape[1]) )
         
         
-    #do a naive filling of missing data
-    dataframe.fillna( method="bfill", inplace=True)
-    dataframe.fillna( method="ffill", inplace=True)
     
-    return dataframe
     
+    return transform_data( dataframe )
 
     
-def cv( model, data, response, weights, K=5, location_data = [], report_training=True, output=None):
+def transform_data( dataframe ):
+    """
+    This creates proportions out of the data.
+    """
+    acs_population = dataframe['Tot_Population_ACS_06_10']
+    acs_populations_to_normalize = [
+            "Males_ACS_06_10",
+            "Females_ACS_06_10", 
+            "Pop_under_5_ACS_06_10",
+            "Pop_5_17_ACS_06_10",
+            "Pop_18_24_ACS_06_10",
+            "Pop_25_44_ACS_06_10",
+            "Pop_45_64_ACS_06_10",
+              "Pop_65plus_ACS_06_10",
+              "Hispanic_ACS_06_10",
+              "NH_White_alone_ACS_06_10",
+              "NH_Blk_alone_ACS_06_10",
+                "NH_AIAN_alone_ACS_06_10",
+                "NH_Asian_alone_ACS_06_10",
+            "NH_NHOPI_alone_ACS_06_10",
+            "NH_SOR_alone_ACS_06_10",
+            "Pop_5yrs_Over_ACS_06_10",
+              "Othr_Lang_ACS_06_10",
+              "Pop_25yrs_Over_ACS_06_10",
+              "Not_HS_Grad_ACS_06_10",
+              "Not_HS_Grad_ACS_06_10",
+              "Prs_Blw_Pov_Lev_ACS_06_10",
+              "Pov_Univ_ACS_06_10",
+              "Pop_1yr_Over_ACS_06_10",
+              "Diff_HU_1yr_ACS_06_10"]
+    
+    for category in acs_populations_to_normalize:
+        dataframe[category] = dataframe[category]/acs_population
+              
+              
+#denominator is Tot_Occp_Units_ACS_06_10
+    acs_households = dataframe["Tot_Occp_Units_ACS_06_10"]          
+    acs_households_to_normalize = [
+                "NG_VW_SPAN_ACS_06_10",
+                "ENG_VW_INDO_EURO_ACS_06_10",
+                "ENG_VW_API_ACS_06_10",
+                "ENG_VW_OTHER_ACS_06_10",
+                "ENG_VW_ACS_06_10",
+                "Rel_Family_HHD_ACS_06_10",
+                "MrdCple_Fmly_HHD_ACS_06_10",
+                "Not_MrdCple_HHD_ACS_06_10", 
+                "Female_No_HB_ACS_06_10",
+                "NonFamily_HHD_ACS_06_10",
+                "Sngl_Prns_HHD_ACS_06_10",
+                "HHD_PPL_Und_18_ACS_06_10", 
+                "Tot_Prns_in_HHD_ACS_06_10",
+                "Rel_Child_Under_6_ACS_06_10",
+                "HHD_Moved_in_ACS_06_10", 
+                "PUB_ASST_INC_ACS_06_10", 
+                "Aggregate_HH_INC_ACS_06_10",
+                "Tot_Housing_Units_ACS_06_10",
+                "Renter_Occp_HU_ACS_06_10", 
+                "Owner_Occp_HU_ACS_06_10",
+                "Single_Unit_ACS_06_10",
+                "MLT_U2_9_STRC_ACS_06_10",
+                "MLT_U10p_ACS_06_10",
+                "Mobile_Homes_ACS_06_10",
+                "Crowd_Occp_U_ACS_06_10", 
+                "Occp_U_NO_PH_SRVC_ACS_06_10",
+                "No_Plumb_ACS_06_10", 
+                "Built_Last_5_yrs_ACS_06_10",
+                ]
+
+    for catagory in acs_households_to_normalize:
+        dataframe[category] = dataframe[category]/acs_households
+
+
+    
+    
+    #census
+    census_population = dataframe['Tot_Population_CEN_2010']
+    census_pop_to_normalize = [
+        'Males_CEN_2010',
+        'Females_Cen_2010',
+        'Pop_under_5_Cen_2010', 
+        'Pop_5_17_Cen_2010',
+        'Pop_18_24_Cen_2010',
+        'Pop_25_44_Cen_2010',
+        'Pop_45_64_Cen_2010',
+        'Pop_65plus_Cen_2010',
+        'Tot_GQ_Cen_2010',
+        'Inst_GQ_Cen_2010',
+        'Non_Inst_GQ_Cen_2010', 
+        'Hispanic_Cen_2010',
+        'NH_White_alone_Cen_2010', 
+        'NH_Blk_alone_Cen_2010',
+        'NH_AIAN_alone_Cen_2010',
+        'NH_Asian_alone_Cen_2010', 
+        'NH_NHOPI_alone_Cen_2010',
+        'NH_SOR_alone_Cen_2010',]
+        
+    for category in census_pop_to_normalize:
+        dataframe[category] = dataframe[category]/census_populaton
+        
+        
+    census_households = dataframe['Tot_Occp_Units_CEN_2010']
+    census_hhd_to_normalize = [
+        'Rel_Family_HHDS_CEN_2010',
+        "MrdCple_Fmly_HHD_CEN_2010", 
+        "Not_MrdCple_HHD_CEN_2010",
+        'Female_No_HB_CEN_2010',
+        'NonFamily_HHD_CEN_2010',
+        'Sngl_Prns_HHD_CEN_2010',
+        'HHD_PPL_Und_18_CEN_2010',
+        'Tot_Prns_in_HHD_CEN_2010',
+        'Tot_Occp_Units_CEN_2010',
+        'Tot_Vacant_Units_CEN_2010',
+        'Owner_Occp_HU_CEN_2010',
+        ]
+    
+    for category in census_hhd_to_normalize:
+        dataframe[catagory] = dataframe[category] / census_households
+        
+    
+    
+    
+    return dataframe
+
+
+
+
+      
+def cv( model, data, response, weights, K=5, location_data = [], report_training=True):
     """
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
     """
-    if output != None:
-	import sys
-	sys.stdout = open( output, 'w')
-
-
-    kf = KFold( len(response), K , shuffle = True, indices = False) 
+    kf = KFold( len(response), K , indices = False) 
     print kf
-    print model
 
     cv_scores = np.empty( K )
     training_scores = np.empty( K) 
@@ -89,7 +221,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         testing_weights = weights[ test ]
         training_weights = weights[ train ]
 
-	if location_data is not []:
+	if len(location_data) > 0:
 		training_location = [ location_data[train] ]
 		testing_location = [ location_data[test] ]
 
@@ -100,35 +232,34 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
 	fit_args = [ training_data, training_response] + training_location
 	predict_args = [ testing_data ] + testing_location	
 
-
         model.fit( *fit_args )
         prediction = model.predict( *predict_args )
-
         cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
 	
-	print "CV %d: Test Acc: %0.2f (+/- %0.2f)"%(i, cv_scores[:i].mean(), cv_scores[:i].std()/2)
-        
+
+	print "CV %i: Test accuracy: %0.2f (+/- %0.2f)" % (i, cv_scores[:i].mean(), cv_scores[:i].std() / 2)
+	print cv_scores[:i+1]        
 	if report_training:
 
 		predict_args = [ training_data] + training_location        
         	training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response, training_weights)
-		print "CV %d: Train Acc: %0.2f (+/- %0.2f)"%(i, training_scores[:i].mean(), training_scores[:i].std()/2)
-        
+		print "Train acc: %f"%training_scores[i-1]
 	print "--------------------------------"
-        
         i += 1 
+
 
     print "Test accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
     
     if report_training:
-	print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
+        print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
 
     
         
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
-    ix = bn.argpartsort( ((location_data - np.array( [lat,long] ) )**2).sum(axis=1), K,axis=None)
+    v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
+    ix = bn.argpartsort( v, K,axis=None)
     return ix[:K]
     
 
