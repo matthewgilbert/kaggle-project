@@ -1,7 +1,11 @@
-#Data Loading and Cleaning
+###set data input to 'training' or 'test' set
+series = 'test'
 
+
+#Data Loading and Cleaning
 setwd("/home/matthew/Git/kaggle-project/data")
-census.df <- read.csv(file = "training_filev1.csv")
+
+census.df <- read.csv(file = paste(series, "_filev1.csv", sep=''))
 
 temp.df = census.df
 
@@ -68,6 +72,19 @@ unformatted_index = setdiff(unformatted_index,non_acs_housing)
 nonACS_pop_index = unformatted_index
 census.formatted.df[,nonACS_pop_index] = census.formatted.df[,nonACS_pop_index] / census.formatted.df[,totalPop_index]
 
-save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
-write.table(census.formatted.df,"formattedData")
+#hack to add back in GidBG so don't have to change all the hardcoded indices above
+census.formatted.df = cbind('GIDBG'=census.df$GIDBG[keep], census.formatted.df)
+
+if (series == 'training') {
+    save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
+    write.table(census.formatted.df,"formattedData")
+} else if (series == 'test') {
+    test.census.df = census.df
+    test.census.cleaned.df = census.cleaned.df
+    test.census.formatted.df = census.formatted.df
+    save(test.census.df, test.census.cleaned.df, test.census.formatted.df, file = 'cleanedtest.dat')
+    write.table(test.census.formatted.df,"formattedDatatest")
+}
+
+
 
