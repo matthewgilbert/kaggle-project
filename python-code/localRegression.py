@@ -4,6 +4,7 @@ import pandas
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
+from sklearn.preprocessing import Scaler
 import census_utilities
 import geoNN
 
@@ -19,10 +20,12 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, regressor = LinearRegression, params={} ):
+    def __init__(self, k = 200, regressor = LinearRegression, params={}, scale=True ):
         self.k = k
         self.regressor = regressor
 	self.params = params    
+	if scale:
+		self.Scaler = Scaler()
     
     def fit(self, data, response, location_data):
         try:
@@ -54,11 +57,15 @@ class LocalRegression( object ):
         prediction = np.empty( n)
 	location_data = location_data.values
         for i in range(n):
-	    #if i%100 == 0:
-	    #	print i	
+	    if i%100 == 0:
+	    	print i	
             location = location_data[i,:] 
-            inx = self.gnn.find( location[0], location[1], self.k )
-            reg.fit( self.data_[inx,:] , self.response_[inx,:] )
-            prediction[i] = reg.predict( data[i,:] )
+      	    if np.any( pandas.isnull( location ) ):
+		prediction[i] =  self.response_.mean()    
+
+	    else:
+	    	inx = self.gnn.find( location[0], location[1], self.k )
+          	reg.fit( self.Scaler.fit_transform(  self.data_[inx,:] ) , self.response_[inx,:] )
+            	prediction[i] = reg.predict( self.Scaler.transform( data[i,:] ) )
 	return prediction                
                 
