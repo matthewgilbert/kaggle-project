@@ -65,7 +65,7 @@ class LocalRegression( object ):
 
 	    else:
 	    	inx = self.gnn.find( location[0], location[1], self.k )
-          	reg.fit( self.Scaler.fit_transform(  self.data_[inx,:] ) , self.response_[inx,:] )
-            	prediction[i] = reg.predict( self.Scaler.transform( data[i,:] ) )
+          	reg.fit(  self.data_[inx,:] , self.response_[inx,:] )
+            	prediction[i] = reg.predict( data[i,:]  )
 	return prediction                
                 

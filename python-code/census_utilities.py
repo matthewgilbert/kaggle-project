@@ -30,7 +30,7 @@ def preprocess_dataframe( dataframe ):
     del dataframe[ dataframe.columns[169] ]
     
     to_remove = ['Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
-             'County', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE', 'MailBack_Area_Count_CEN_2010']
+             'County', 'LAND_AREA', 'AIAN_LAND', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE', 'MailBack_Area_Count_CEN_2010']
     for to_rm in to_remove:
         try:
             del dataframe[to_rm]
@@ -76,7 +76,7 @@ def transform_data( dataframe ):
     """
     This creates proportions out of the data.
     """
-    acs_population = dataframe['Tot_Population_ACS_06_10']
+    acs_population = dataframe['Tot_Population_ACS_06_10'].astype(np.float64)
     acs_populations_to_normalize = [
             "Males_ACS_06_10",
             "Females_ACS_06_10", 
@@ -101,14 +101,15 @@ def transform_data( dataframe ):
               "Prs_Blw_Pov_Lev_ACS_06_10",
               "Pov_Univ_ACS_06_10",
               "Pop_1yr_Over_ACS_06_10",
-              "Diff_HU_1yr_ACS_06_10"]
+              "Diff_HU_1yr_Ago_ACS_06_10"]
     
     for category in acs_populations_to_normalize:
         dataframe[category] = dataframe[category]/acs_population
-              
+    
+    del dataframe['Tot_Population_ACS_06_10']  
               
 #denominator is Tot_Occp_Units_ACS_06_10
-    acs_households = dataframe["Tot_Occp_Units_ACS_06_10"]          
+    acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
                 "NG_VW_SPAN_ACS_06_10",
                 "ENG_VW_INDO_EURO_ACS_06_10",
@@ -143,36 +144,36 @@ def transform_data( dataframe ):
     for catagory in acs_households_to_normalize:
         dataframe[category] = dataframe[category]/acs_households
 
-
+    del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
     #census
-    census_population = dataframe['Tot_Population_CEN_2010']
+    census_population = dataframe['Tot_Population_CEN_2010'].astype(np.float64)
     census_pop_to_normalize = [
         'Males_CEN_2010',
-        'Females_Cen_2010',
-        'Pop_under_5_Cen_2010', 
-        'Pop_5_17_Cen_2010',
-        'Pop_18_24_Cen_2010',
-        'Pop_25_44_Cen_2010',
-        'Pop_45_64_Cen_2010',
-        'Pop_65plus_Cen_2010',
-        'Tot_GQ_Cen_2010',
-        'Inst_GQ_Cen_2010',
-        'Non_Inst_GQ_Cen_2010', 
-        'Hispanic_Cen_2010',
-        'NH_White_alone_Cen_2010', 
-        'NH_Blk_alone_Cen_2010',
-        'NH_AIAN_alone_Cen_2010',
-        'NH_Asian_alone_Cen_2010', 
-        'NH_NHOPI_alone_Cen_2010',
-        'NH_SOR_alone_Cen_2010',]
+        'Females_CEN_2010',
+        'Pop_under_5_CEN_2010', 
+        'Pop_5_17_CEN_2010',
+        'Pop_18_24_CEN_2010',
+        'Pop_25_44_CEN_2010',
+        'Pop_45_64_CEN_2010',
+        'Pop_65plus_CEN_2010',
+        'Tot_GQ_CEN_2010',
+        'Inst_GQ_CEN_2010',
+        'Non_Inst_GQ_CEN_2010', 
+        'Hispanic_CEN_2010',
+        'NH_White_alone_CEN_2010', 
+        'NH_Blk_alone_CEN_2010',
+        'NH_AIAN_alone_CEN_2010',
+        'NH_Asian_alone_CEN_2010', 
+        'NH_NHOPI_alone_CEN_2010',
+        'NH_SOR_alone_CEN_2010',]
         
     for category in census_pop_to_normalize:
-        dataframe[category] = dataframe[category]/census_populaton
+        dataframe[category] = dataframe[category]/census_population
+    del dataframe['Tot_Population_CEN_2010']     
         
-        
-    census_households = dataframe['Tot_Occp_Units_CEN_2010']
+    census_households = dataframe['Tot_Occp_Units_CEN_2010'].astype(np.float64)
     census_hhd_to_normalize = [
         'Rel_Family_HHDS_CEN_2010',
         "MrdCple_Fmly_HHD_CEN_2010", 
@@ -190,8 +191,9 @@ def transform_data( dataframe ):
     for category in census_hhd_to_normalize:
         dataframe[catagory] = dataframe[category] / census_households
         
-    
-    
+    del dataframe['Tot_Occp_Units_CEN_2010']
+    #for some reason, 0 are NAs, so we will just make them zeros explicitly
+    dataframe.fillna( 0, inplace = True )    
     
     return dataframe
 
