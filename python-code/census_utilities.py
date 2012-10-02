@@ -23,11 +23,19 @@ def WMAEscore( prediction, response, weights):
  
 def generate_features( dataframe ):
 
-    #population density
+    #population density /sq mile
     dataframe['Population Density'] = dataframe['Tot_Population_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
     
+    #housing density
+    dataframe['Housing Density'] = dataframe['Tot_Occp_Units_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
     
+    #bilingual/spanish 
     
+    dataframe['Diff_Of_Spanish_ACS_Prop_to_Spanish_Ballot_Prop'] = dataframe['ENG_VW_SPAN_ACS_06_10']/dataframe['Tot_Occp_Units_ACS_06_10'] ).astype( np.float64) - 
+                                                                        - dataframe['BILQ_Mailout_count_CEN_2010']/dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
+
+    dataframe['Diff_Of_Spanish_CEN_Prop_to_Spanish_Ballot_Prop'] = dataframe['Hispanic_Cen_2010']/dataframe['Tot_Population_CEN_2010'] ).astype( np.float64) - 
+                                                                        - dataframe['BILQ_Mailout_count_CEN_2010']/dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
     
     return dataframe
  
@@ -103,6 +111,13 @@ def transform_data( dataframe ):
     """
     This creates proportions out of the data.
     """
+    
+    #education
+    for category in [' Not_HS_Grad_ACS_06_10',  'College_ACS_06_10'] :
+            dataframe[category] = dataframe[category]/dataframe['Pop_25yrs_Over_ACS_06_10'].astype(np.float64)
+            dataframe.rename( columns = { category: category + "/" + "Pop_25yrs_Over_ACS_06_10" }, inplace = True )
+    
+    
     acs_population = dataframe['Tot_Population_ACS_06_10'].astype(np.float64)
     acs_populations_to_normalize = [
             "Males_ACS_06_10",
@@ -123,12 +138,11 @@ def transform_data( dataframe ):
             "Pop_5yrs_Over_ACS_06_10",
               "Othr_Lang_ACS_06_10",
               "Pop_25yrs_Over_ACS_06_10",
-              "Not_HS_Grad_ACS_06_10",
               "Prs_Blw_Pov_Lev_ACS_06_10",
               "Pov_Univ_ACS_06_10",
               "Pop_1yr_Over_ACS_06_10",
               "Diff_HU_1yr_Ago_ACS_06_10",
-              "College_ACS_06_10",]
+             ]
     
     for category in acs_populations_to_normalize:
         dataframe[category] = dataframe[category]/acs_population
@@ -178,6 +192,9 @@ def transform_data( dataframe ):
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
+
+
+    
     #census
     census_population = dataframe['Tot_Population_CEN_2010'].astype(np.float64)
     census_pop_to_normalize = [
@@ -221,7 +238,9 @@ def transform_data( dataframe ):
         'Tot_Prns_in_HHD_CEN_2010',
         'Tot_Vacant_Units_CEN_2010',
         'Owner_Occp_HU_CEN_2010',
-        'Rel_Child_Under_6_CEN_2010',
+        'Rel_Child_Under_6_CEN_2010'
+        'Renter_Occp_HU_CEN_2010',
+        'Tot_Housing_Units_CEN_2010',
         ]
     
     for category in census_hhd_to_normalize:
@@ -229,7 +248,7 @@ def transform_data( dataframe ):
         dataframe.rename( columns = { category: category + "/" + 'Tot_Occp_Units_CEN_2010' }, inplace = True )
 
     del dataframe['Tot_Occp_Units_CEN_2010']
-    del dataframe['Tot_Housing_Units_CEN_2010'] #not really important.
+    #del dataframe['Tot_Housing_Units_CEN_2010'] #not really important.
     #for some reason, there are some places that just suck at reporting good data.
     dataframe.fillna( 0, inplace = True )    
     
