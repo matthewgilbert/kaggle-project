@@ -33,7 +33,7 @@ def generate_features( dataframe ):
  
  
 
-def preprocess_dataframe( dataframe, location_data=[] ):
+def preprocess_dataframe( dataframe, training=1 ):
     """
     Use this to preprocess crossvalidation data and testing data.
     
@@ -41,14 +41,23 @@ def preprocess_dataframe( dataframe, location_data=[] ):
     
     dataframe = generate_features( dataframe )
     
-    
     #some data points are giving us problems, lets delete them. 
-    if len( location_data ) > 0:
-        print "dropping some data points. Check."
+    if training:
+        print "dropping some data points."
+	print "Previous size: %d"%dataframe.shape[0]
         ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
         dataframe = dataframe.drop( ix )
-        location_data = location_data.drop( ix )
+
+	#dataframe = dataframe.dropna(subset=['2000_response'])
+	print "New Size: %d"%dataframe.shape[0]
     
+    weights = None
+    response = None
+    location_data = dataframe[ ['LATITUDE', 'LONGITUDE'] ] 
+    if training:
+    	response = dataframe['Mail_Return_Rate_CEN_2010']
+    	weights = dataframe['weight']
+ 
     
     to_remove = ['TEA_Mail_Out_Mail_Back_CEN_2010','TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
              'County', 'LAND_AREA', 'AIAN_LAND', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE', 'MailBack_Area_Count_CEN_2010']
@@ -85,11 +94,9 @@ def preprocess_dataframe( dataframe, location_data=[] ):
      
     #how much of the data is missing?
     print "Proportion of missing data: %f."%( float( pandas.isnull( dataframe ).sum().sum() )/(dataframe.shape[0]*dataframe.shape[1]) )
-        
-        
     
     
-    return transform_data( dataframe ), location_data
+    return transform_data( dataframe ), location_data, response, weights
 
     
 def transform_data( dataframe ):

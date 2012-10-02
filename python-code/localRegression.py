@@ -9,6 +9,11 @@ import census_utilities
 import geoNN
 
 
+
+def identity(x):
+	return x
+
+
 class LocalRegression( object ):
     """implements a scikitlearn model that finds nearest geographic neighbours and computes a regression. Defaults
     to a global regression if location data is not available.
@@ -20,12 +25,15 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, regressor = LinearRegression, params={}, scale=True ):
+    def __init__(self, k = 200, regressor = LinearRegression, params={}, scale=True, response_f = identity, inv_response_f = identity ):
         self.k = k
         self.regressor = regressor
 	self.params = params    
 	if scale:
 		self.Scaler = Scaler()
+	
+	self.response_f = response_f
+	self.inv_response_f = inv_response_f
    
     def __str__(self):
 	return "%dK%sLocalRegression"%(self.k, self.regressor.__name__.replace(" ", "" ))
@@ -68,10 +76,10 @@ class LocalRegression( object ):
 
 	    else:
 	    	inx = self.gnn.find( location[0], location[1], self.k )
-          	reg.fit(  self.data_[inx,:] , np.arcsin( self.response_[inx,:]/100 ) )
+          	reg.fit(  self.data_[inx,:] , self.response_f( self.response_[inx,:] ) )
             	prediction[i] = reg.predict( data[i,:]  )
 	#make sure everything is inside [0-100]
-	prediction = 100*np.sin( prediction )
+	prediction = self.inv_response_f( prediction )
 	print (prediction > 100).sum()
 	print (prediction < 0 ).sum()
 	prediction[ prediction > 100 ] = 99	
