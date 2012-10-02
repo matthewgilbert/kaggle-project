@@ -31,11 +31,9 @@ def generate_features( dataframe ):
     
     #bilingual/spanish 
     
-    dataframe['Diff_Of_Spanish_ACS_Prop_to_Spanish_Ballot_Prop'] = dataframe['ENG_VW_SPAN_ACS_06_10']/dataframe['Tot_Occp_Units_ACS_06_10'] ).astype( np.float64) - 
-                                                                        - dataframe['BILQ_Mailout_count_CEN_2010']/dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
+    #dataframe['Diff_Of_Spanish_ACS_Prop_to_Spanish_Ballot_Prop'] = dataframe['ENG_VW_SPAN_ACS_06_10']/(dataframe['Tot_Occp_Units_ACS_06_10'] ).astype( np.float64)  - dataframe['BILQ_Mailout_count_CEN_2010']/(dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
 
-    dataframe['Diff_Of_Spanish_CEN_Prop_to_Spanish_Ballot_Prop'] = dataframe['Hispanic_Cen_2010']/dataframe['Tot_Population_CEN_2010'] ).astype( np.float64) - 
-                                                                        - dataframe['BILQ_Mailout_count_CEN_2010']/dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
+    #dataframe['Diff_Of_Spanish_CEN_Prop_to_Spanish_Ballot_Prop'] = dataframe['Hispanic_CEN_2010']/(dataframe['Tot_Population_CEN_2010'] ).astype( np.float64) - dataframe['BILQ_Mailout_count_CEN_2010']/(dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
     
     return dataframe
  
@@ -113,7 +111,7 @@ def transform_data( dataframe ):
     """
     
     #education
-    for category in [' Not_HS_Grad_ACS_06_10',  'College_ACS_06_10'] :
+    for category in ['Not_HS_Grad_ACS_06_10',  'College_ACS_06_10'] :
             dataframe[category] = dataframe[category]/dataframe['Pop_25yrs_Over_ACS_06_10'].astype(np.float64)
             dataframe.rename( columns = { category: category + "/" + "Pop_25yrs_Over_ACS_06_10" }, inplace = True )
     
@@ -238,7 +236,7 @@ def transform_data( dataframe ):
         'Tot_Prns_in_HHD_CEN_2010',
         'Tot_Vacant_Units_CEN_2010',
         'Owner_Occp_HU_CEN_2010',
-        'Rel_Child_Under_6_CEN_2010'
+        'Rel_Child_Under_6_CEN_2010',
         'Renter_Occp_HU_CEN_2010',
         'Tot_Housing_Units_CEN_2010',
         ]

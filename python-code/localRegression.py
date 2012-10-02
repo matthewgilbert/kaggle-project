@@ -34,6 +34,7 @@ class LocalRegression( object ):
 	
 	self.response_f = response_f
 	self.inv_response_f = inv_response_f
+	self.zero_coef_ = np.zeros( 10000 )
    
     def __str__(self):
 	return "%dK%sLocalRegression"%(self.k, self.regressor.__name__.replace(" ", "" ))
@@ -77,11 +78,13 @@ class LocalRegression( object ):
 	    else:
 	    	inx = self.gnn.find( location[0], location[1], self.k )
           	reg.fit(  self.data_[inx,:] , self.response_f( self.response_[inx,:] ) )
+		try:
+		    self.zero_coef_[ np.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
+		except:
+		    pass
             	prediction[i] = reg.predict( data[i,:]  )
 	#make sure everything is inside [0-100]
 	prediction = self.inv_response_f( prediction )
-	print (prediction > 100).sum()
-	print (prediction < 0 ).sum()
 	prediction[ prediction > 100 ] = 99	
 	prediction[ prediction < 0 ] = 4
 	return prediction                
