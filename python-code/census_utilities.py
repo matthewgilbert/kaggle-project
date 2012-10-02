@@ -43,12 +43,13 @@ def preprocess_dataframe( dataframe, location_data ):
     
     
     #some data points are giving us problems, lets delete them. 
+    print "dropping some data points. Check."
     ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
     dataframe.drop( ix )
     location_data.drop( ix )
     
     
-    to_remove = ['TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
+    to_remove = ['TEA_Mail_Out_Mail_Back_CEN_2010','TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
              'County', 'LAND_AREA', 'AIAN_LAND', 'GIDBG', 'Tract', 'Block_Group', 'Flag', 'weight', 'LATITUDE', 'LONGITUDE', 'MailBack_Area_Count_CEN_2010']
              
     for to_rm in to_remove:
@@ -118,7 +119,8 @@ def transform_data( dataframe ):
               "Prs_Blw_Pov_Lev_ACS_06_10",
               "Pov_Univ_ACS_06_10",
               "Pop_1yr_Over_ACS_06_10",
-              "Diff_HU_1yr_Ago_ACS_06_10"]
+              "Diff_HU_1yr_Ago_ACS_06_10",
+              "College_ACS_06_10",]
     
     for category in acs_populations_to_normalize:
         dataframe[category] = dataframe[category]/acs_population
@@ -157,6 +159,8 @@ def transform_data( dataframe ):
                 "Occp_U_NO_PH_SRVC_ACS_06_10",
                 "No_Plumb_ACS_06_10", 
                 "Built_Last_5_yrs_ACS_06_10",
+                "Tot_Vacant_Units_ACS_06_10",
+                "Aggr_House_Value_ACS_06_10 ",
                 ]
 
     for category in acs_households_to_normalize:
@@ -209,6 +213,7 @@ def transform_data( dataframe ):
         'Tot_Prns_in_HHD_CEN_2010',
         'Tot_Vacant_Units_CEN_2010',
         'Owner_Occp_HU_CEN_2010',
+        'Rel_Child_Under_6_CEN_2010',
         ]
     
     for category in census_hhd_to_normalize:
@@ -216,6 +221,7 @@ def transform_data( dataframe ):
         dataframe.rename( columns = { category: category + "/" + 'Tot_Occp_Units_CEN_2010' }, inplace = True )
 
     del dataframe['Tot_Occp_Units_CEN_2010']
+    del dataframe['Tot_Housing_Units_CEN_2010'] #not really important.
     #for some reason, there are some places that just suck at reporting good data.
     dataframe.fillna( 0, inplace = True )    
     
