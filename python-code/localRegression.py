@@ -68,7 +68,13 @@ class LocalRegression( object ):
 
 	    else:
 	    	inx = self.gnn.find( location[0], location[1], self.k )
-          	reg.fit(  self.data_[inx,:] , self.response_[inx,:] )
+          	reg.fit(  self.data_[inx,:] , np.arcsin( self.response_[inx,:]/100 ) )
             	prediction[i] = reg.predict( data[i,:]  )
+	#make sure everything is inside [0-100]
+	prediction = 100*np.sin( prediction )
+	print (prediction > 100).sum()
+	print (prediction < 0 ).sum()
+	prediction[ prediction > 100 ] = 99	
+	prediction[ prediction < 0 ] = 4
 	return prediction                
                 

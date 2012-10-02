@@ -43,11 +43,11 @@ def preprocess_dataframe( dataframe, location_data=[] ):
     
     
     #some data points are giving us problems, lets delete them. 
-    if len( location_data ) == 0
+    if len( location_data ) > 0:
         print "dropping some data points. Check."
         ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
-        dataframe.drop( ix )
-        location_data.drop( ix )
+        dataframe = dataframe.drop( ix )
+        location_data = location_data.drop( ix )
     
     
     to_remove = ['TEA_Mail_Out_Mail_Back_CEN_2010','TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
@@ -237,7 +237,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
     """
-    kf = KFold( len(response), K , indices = False) 
+    kf = KFold( len(response), K , indices = False, shuffle=True) 
     print kf
 
     cv_scores = np.empty( K )
@@ -273,15 +273,15 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
 	print "CV %i: Test accuracy: %0.2f (+/- %0.2f)" % (i, cv_scores[:i].mean(), cv_scores[:i].std() / 2)
 	print cv_scores[:i+1]        
 	if report_training:
-        n_testing_data = testing_response.shape[0]
-        try:
-            training_location[0] = training_location[0][:n_testing_data] 
-        except:
-            pass
+        	n_testing_data = testing_response.shape[0]
+        	try:
+            		training_location[0] = training_location[0][:n_testing_data] 
+        	except:
+            		pass
             
 		predict_args = [ training_data[:n_testing_data] ] + training_location        
-        	training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response, training_weights)
-		print "Train acc: %f"%training_scores[i-1]
+        	training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[:n_testing_data], training_weights[:n_testing_data])
+		print "CV %i: Train accuracy: %0.2f (+/- %0.2f)" % (i, training_scores[:i].mean(), training_scores[:i].std() / 2)
 	print "--------------------------------"
         i += 1 
 
