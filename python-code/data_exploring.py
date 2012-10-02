@@ -33,7 +33,7 @@ location_data = data[ ['LATITUDE','LONGITUDE'] ]
 #del data['weight']
 #del data[ data.columns[0] ]
 #preprocess data.
-data = preprocess_dataframe( data )
+data, location_data = preprocess_dataframe( data, location_data )
 print "Data cleaned. TODO: check cleaning algos"
 #Ok data is pretty clean, what can we do with it?
 

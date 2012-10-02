@@ -26,7 +26,10 @@ class LocalRegression( object ):
 	self.params = params    
 	if scale:
 		self.Scaler = Scaler()
-    
+   
+    def __str__(self):
+	return "%dK%sLocalRegression"%(self.k, self.regressor.__name__.replace(" ", "" ))
+ 
     def fit(self, data, response, location_data):
         try:
 		#incase I pass in a numpy array or pandas df

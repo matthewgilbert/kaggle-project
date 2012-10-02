@@ -115,7 +115,6 @@ def transform_data( dataframe ):
               "Othr_Lang_ACS_06_10",
               "Pop_25yrs_Over_ACS_06_10",
               "Not_HS_Grad_ACS_06_10",
-              "Not_HS_Grad_ACS_06_10",
               "Prs_Blw_Pov_Lev_ACS_06_10",
               "Pov_Univ_ACS_06_10",
               "Pop_1yr_Over_ACS_06_10",
@@ -123,14 +122,14 @@ def transform_data( dataframe ):
     
     for category in acs_populations_to_normalize:
         dataframe[category] = dataframe[category]/acs_population
-        dataframe.rename( columns = { column: column + "/" + 'Tot_Population_ACS_06_10' }, inplace = True )
+        dataframe.rename( columns = { category: category + "/" + 'Tot_Population_ACS_06_10' }, inplace = True )
         
     del dataframe['Tot_Population_ACS_06_10']  
               
     #denominator is Tot_Occp_Units_ACS_06_10
     acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
-                "NG_VW_SPAN_ACS_06_10",
+                "ENG_VW_SPAN_ACS_06_10",
                 "ENG_VW_INDO_EURO_ACS_06_10",
                 "ENG_VW_API_ACS_06_10",
                 "ENG_VW_OTHER_ACS_06_10",
@@ -160,9 +159,9 @@ def transform_data( dataframe ):
                 "Built_Last_5_yrs_ACS_06_10",
                 ]
 
-    for catagory in acs_households_to_normalize:
+    for category in acs_households_to_normalize:
         dataframe[category] = dataframe[category]/acs_households
-        dataframe.rename( columns = { column: column + "/" + "Tot_Occp_Units_ACS_06_10" }, inplace = True )
+        dataframe.rename( columns = { category: category + "/" + "Tot_Occp_Units_ACS_06_10" }, inplace = True )
 
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
@@ -194,7 +193,7 @@ def transform_data( dataframe ):
         
     for category in census_pop_to_normalize:
         dataframe[category] = dataframe[category]/census_population
-        dataframe.rename( columns = { column: column + "/" + 'Tot_Population_CEN_2010' }, inplace = True )
+        dataframe.rename( columns = { category: category + "/" + 'Tot_Population_CEN_2010' }, inplace = True )
 
     del dataframe['Tot_Population_CEN_2010']     
         
@@ -208,20 +207,19 @@ def transform_data( dataframe ):
         'Sngl_Prns_HHD_CEN_2010',
         'HHD_PPL_Und_18_CEN_2010',
         'Tot_Prns_in_HHD_CEN_2010',
-        'Tot_Occp_Units_CEN_2010',
         'Tot_Vacant_Units_CEN_2010',
         'Owner_Occp_HU_CEN_2010',
         ]
     
     for category in census_hhd_to_normalize:
-        dataframe[catagory] = dataframe[category] / census_households
-        dataframe.rename( columns = { column: column + "/" + 'Tot_Occp_Units_CEN_2010' }, inplace = True )
+        dataframe[category] = dataframe[category] / census_households
+        dataframe.rename( columns = { category: category + "/" + 'Tot_Occp_Units_CEN_2010' }, inplace = True )
 
     del dataframe['Tot_Occp_Units_CEN_2010']
     #for some reason, there are some places that just suck at reporting good data.
     dataframe.fillna( 0, inplace = True )    
     
-    return dataframe, location_data
+    return dataframe
 
 
 
