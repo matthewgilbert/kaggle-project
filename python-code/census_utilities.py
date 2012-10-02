@@ -33,7 +33,7 @@ def generate_features( dataframe ):
  
  
 
-def preprocess_dataframe( dataframe, location_data ):
+def preprocess_dataframe( dataframe, location_data=[] ):
     """
     Use this to preprocess crossvalidation data and testing data.
     
@@ -43,10 +43,11 @@ def preprocess_dataframe( dataframe, location_data ):
     
     
     #some data points are giving us problems, lets delete them. 
-    print "dropping some data points. Check."
-    ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
-    dataframe.drop( ix )
-    location_data.drop( ix )
+    if len( location_data ) == 0
+        print "dropping some data points. Check."
+        ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
+        dataframe.drop( ix )
+        location_data.drop( ix )
     
     
     to_remove = ['TEA_Mail_Out_Mail_Back_CEN_2010','TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
@@ -160,7 +161,7 @@ def transform_data( dataframe ):
                 "No_Plumb_ACS_06_10", 
                 "Built_Last_5_yrs_ACS_06_10",
                 "Tot_Vacant_Units_ACS_06_10",
-                "Aggr_House_Value_ACS_06_10 ",
+                "Aggr_House_Value_ACS_06_10",
                 ]
 
     for category in acs_households_to_normalize:
@@ -272,8 +273,13 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
 	print "CV %i: Test accuracy: %0.2f (+/- %0.2f)" % (i, cv_scores[:i].mean(), cv_scores[:i].std() / 2)
 	print cv_scores[:i+1]        
 	if report_training:
-
-		predict_args = [ training_data] + training_location        
+        n_testing_data = testing_response.shape[0]
+        try:
+            training_location[0] = training_location[0][:n_testing_data] 
+        except:
+            pass
+            
+		predict_args = [ training_data[:n_testing_data] ] + training_location        
         	training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response, training_weights)
 		print "Train acc: %f"%training_scores[i-1]
 	print "--------------------------------"

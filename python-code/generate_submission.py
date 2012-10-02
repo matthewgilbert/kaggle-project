@@ -27,7 +27,7 @@ training_data = pandas.load( "../training_file_plus_location.pickle" )
 training_location_data = training_data[ ['LATITUDE', 'LONGITUDE' ] ]
 training_response = training_data['Mail_Return_Rate_CEN_2010']
 training_weights = training_data['weight']
-training_data = preprocess_dataframe( training_data)
+training_data = preprocess_dataframe( training_data, training_location_data)
 
 ### CREATE MODEL ###
 elnet = sklm.ElasticNet
