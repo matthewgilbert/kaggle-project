@@ -3,8 +3,6 @@ series = 'test'
 
 
 #Data Loading and Cleaning
-setwd("/home/matthew/Git/kaggle-project/data")
-
 census.df <- read.csv(file = paste(series, "_filev1.csv", sep=''))
 
 temp.df = census.df
