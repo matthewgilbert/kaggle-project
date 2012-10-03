@@ -191,12 +191,11 @@ def transform_data( dataframe ):
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
-    
+    Not_MrdCple_HHD_CEN_2010
     
     
     #we should reduce redundancy
     del dataframe['Males_CEN_2010']
-    del dataframe['Not_MrdCple_HHD_CEN_2010']
     del dataframe['Non_Inst_GQ_CEN_2010']
     
     #census
