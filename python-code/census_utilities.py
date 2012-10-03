@@ -24,10 +24,10 @@ def WMAEscore( prediction, response, weights):
 def generate_features( dataframe ):
 
     #population density /sq mile
-    dataframe['Population Density'] = dataframe['Tot_Population_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
+    #dataframe['Population Density'] = dataframe['Tot_Population_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
     
     #housing density
-    dataframe['Housing Density'] = dataframe['Tot_Occp_Units_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
+    #dataframe['Housing Density'] = dataframe['Tot_Occp_Units_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
     
     #bilingual/spanish 
     
@@ -44,7 +44,8 @@ def preprocess_dataframe( dataframe, training=1 ):
     Use this to preprocess crossvalidation data and testing data.
     
     """
-    
+    del dataframe[ dataframe.columns[0] ]
+    del dataframe[ dataframe.columns[0] ]    
     dataframe = generate_features( dataframe )
     
     #some data points are giving us problems, lets delete them. 
@@ -196,7 +197,6 @@ def transform_data( dataframe ):
     
     #we should reduce redundancy
     del dataframe['Males_CEN_2010']
-    del dataframe['Not_MrdCple_HHD_CEN_2010']
     del dataframe['Non_Inst_GQ_CEN_2010']
     
     #census
