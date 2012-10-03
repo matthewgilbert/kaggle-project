@@ -24,10 +24,10 @@ def WMAEscore( prediction, response, weights):
 def generate_features( dataframe ):
 
     #population density /sq mile
-    dataframe['Population Density'] = dataframe['Tot_Population_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
+    #dataframe['Population Density'] = dataframe['Tot_Population_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
     
     #housing density
-    dataframe['Housing Density'] = dataframe['Tot_Occp_Units_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
+    #dataframe['Housing Density'] = dataframe['Tot_Occp_Units_CEN_2010']/( dataframe['LAND_AREA'] ).astype( np.float64)
     
     #bilingual/spanish 
     
@@ -44,7 +44,8 @@ def preprocess_dataframe( dataframe, training=1 ):
     Use this to preprocess crossvalidation data and testing data.
     
     """
-    
+    del dataframe[ dataframe.columns[0] ]
+    del dataframe[ dataframe.columns[0] ]    
     dataframe = generate_features( dataframe )
     
     #some data points are giving us problems, lets delete them. 
@@ -116,24 +117,38 @@ def transform_data( dataframe ):
             dataframe.rename( columns = { category: category + "/" + "Pop_25yrs_Over_ACS_06_10" }, inplace = True )
     
     del dataframe["Males_ACS_06_10"]
+    del dataframe["Females_ACS_06_10"]
     del dataframe["Pop_under_5_ACS_06_10"]
+    del dataframe["Pop_5_17_ACS_06_10"]
+    del dataframe["Pop_18_24_ACS_06_10"]
+    del dataframe["Pop_25_44_ACS_06_10"]
+    del dataframe["Pop_45_64_ACS_06_10"]
+    del dataframe["Pop_65plus_ACS_06_10"]
+    del dataframe["Hispanic_ACS_06_10"]
+    del dataframe["NH_White_alone_ACS_06_10"]
+    del dataframe["NH_Blk_alone_ACS_06_10"]
+    del dataframe["NH_AIAN_alone_ACS_06_10"]
+    del dataframe["NH_Asian_alone_ACS_06_10"]
+    del dataframe["NH_NHOPI_alone_ACS_06_10"]
+    del dataframe["NH_SOR_alone_ACS_06_10"]
+    
     acs_population = dataframe['Tot_Population_ACS_06_10'].astype(np.float64)
     acs_populations_to_normalize = [
         #    "Males_ACS_06_10",
-            "Females_ACS_06_10", 
+            #"Females_ACS_06_10", 
             #"Pop_under_5_ACS_06_10",
-            "Pop_5_17_ACS_06_10",
-            "Pop_18_24_ACS_06_10",
-            "Pop_25_44_ACS_06_10",
-            "Pop_45_64_ACS_06_10",
-              "Pop_65plus_ACS_06_10",
-              "Hispanic_ACS_06_10",
-              "NH_White_alone_ACS_06_10",
-              "NH_Blk_alone_ACS_06_10",
-                "NH_AIAN_alone_ACS_06_10",
-                "NH_Asian_alone_ACS_06_10",
-            "NH_NHOPI_alone_ACS_06_10",
-            "NH_SOR_alone_ACS_06_10",
+            #"Pop_5_17_ACS_06_10",
+            #"Pop_18_24_ACS_06_10",
+            #"Pop_25_44_ACS_06_10",
+            #"Pop_45_64_ACS_06_10",
+             # "Pop_65plus_ACS_06_10",
+              #"Hispanic_ACS_06_10",
+              #"NH_White_alone_ACS_06_10",
+              #"NH_Blk_alone_ACS_06_10",
+                #"NH_AIAN_alone_ACS_06_10",
+                #"NH_Asian_alone_ACS_06_10",
+            #"NH_NHOPI_alone_ACS_06_10",
+            #"NH_SOR_alone_ACS_06_10",
             "Pop_5yrs_Over_ACS_06_10",
               "Othr_Lang_ACS_06_10",
               "Pop_25yrs_Over_ACS_06_10",
@@ -150,6 +165,14 @@ def transform_data( dataframe ):
               
               
     del dataframe["Not_MrdCple_HHD_ACS_06_10"]   
+    del dataframe["Tot_Prns_in_HHD_ACS_06_10"]   
+    del dataframe["Owner_Occp_HU_ACS_06_10"]   
+    del dataframe["Renter_Occp_HU_ACS_06_10"]   
+    del dataframe["NonFamily_HHD_ACS_06_10"]   
+    del dataframe["Sngl_Prns_HHD_ACS_06_10"]   
+    del dataframe["MrdCple_Fmly_HHD_ACS_06_10"]   
+    del dataframe["Rel_Child_Under_6_ACS_06_10"]   
+    del dataframe["Female_No_HB_ACS_06_10"]   
     #denominator is Tot_Occp_Units_ACS_06_10
     acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
@@ -159,20 +182,20 @@ def transform_data( dataframe ):
                 "ENG_VW_OTHER_ACS_06_10",
                 "ENG_VW_ACS_06_10",
                 "Rel_Family_HHD_ACS_06_10",
-                "MrdCple_Fmly_HHD_ACS_06_10",
+                #"MrdCple_Fmly_HHD_ACS_06_10",
                 #"Not_MrdCple_HHD_ACS_06_10", 
-                "Female_No_HB_ACS_06_10",
-                "NonFamily_HHD_ACS_06_10",
-                "Sngl_Prns_HHD_ACS_06_10",
+                #"Female_No_HB_ACS_06_10",
+                #"NonFamily_HHD_ACS_06_10",
+                #"Sngl_Prns_HHD_ACS_06_10",
                 "HHD_PPL_Und_18_ACS_06_10", 
-                "Tot_Prns_in_HHD_ACS_06_10",
-                "Rel_Child_Under_6_ACS_06_10",
+                #"Tot_Prns_in_HHD_ACS_06_10",
+                #"Rel_Child_Under_6_ACS_06_10",
                 "HHD_Moved_in_ACS_06_10", 
                 "PUB_ASST_INC_ACS_06_10", 
                 "Aggregate_HH_INC_ACS_06_10",
                 "Tot_Housing_Units_ACS_06_10",
-                "Renter_Occp_HU_ACS_06_10", 
-                "Owner_Occp_HU_ACS_06_10",
+                #"Renter_Occp_HU_ACS_06_10", 
+                #"Owner_Occp_HU_ACS_06_10",
                 "Single_Unit_ACS_06_10",
                 "MLT_U2_9_STRC_ACS_06_10",
                 "MLT_U10p_ACS_06_10",
@@ -191,12 +214,11 @@ def transform_data( dataframe ):
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
-    
+    Not_MrdCple_HHD_CEN_2010
     
     
     #we should reduce redundancy
     del dataframe['Males_CEN_2010']
-    del dataframe['Not_MrdCple_HHD_CEN_2010']
     del dataframe['Non_Inst_GQ_CEN_2010']
     
     #census
