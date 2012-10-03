@@ -79,13 +79,15 @@ clean <- function(series) {
 
     if (series == 'training') {
         save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
-        write.table(census.formatted.df,"formattedData")
+        write.table(census.formatted.df,"formattedData.csv")
+        sprintf("The file cleaned.dat and formattedData.csv were printed to %s", getwd())
     } else if (series == 'test') {
         test.census.df = census.df
         test.census.cleaned.df = census.cleaned.df
         test.census.formatted.df = census.formatted.df
         save(test.census.df, test.census.cleaned.df, test.census.formatted.df, file = 'cleanedtest.dat')
-        write.table(test.census.formatted.df,"formattedDatatest")
+        write.table(test.census.formatted.df,"formattedDatatest.csv")
+        sprintf("The file cleanedtest.dat and formattedDatatest.csv were printed to %s", getwd())
     }
 
 }
