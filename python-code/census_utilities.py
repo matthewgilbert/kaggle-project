@@ -115,12 +115,13 @@ def transform_data( dataframe ):
             dataframe[category] = dataframe[category]/dataframe['Pop_25yrs_Over_ACS_06_10'].astype(np.float64)
             dataframe.rename( columns = { category: category + "/" + "Pop_25yrs_Over_ACS_06_10" }, inplace = True )
     
-    
+    del dataframe["Males_ACS_06_10"]
+    del dataframe["Pop_under_5_ACS_06_10"]
     acs_population = dataframe['Tot_Population_ACS_06_10'].astype(np.float64)
     acs_populations_to_normalize = [
-            "Males_ACS_06_10",
+        #    "Males_ACS_06_10",
             "Females_ACS_06_10", 
-            "Pop_under_5_ACS_06_10",
+            #"Pop_under_5_ACS_06_10",
             "Pop_5_17_ACS_06_10",
             "Pop_18_24_ACS_06_10",
             "Pop_25_44_ACS_06_10",
@@ -144,10 +145,11 @@ def transform_data( dataframe ):
     
     for category in acs_populations_to_normalize:
         dataframe[category] = dataframe[category]/acs_population
-        dataframe.rename( columns = { category: category + "/" + 'Tot_Population_ACS_06_10' }, inplace = True )
-        
+        dataframe.rename( columns = { category: category + "/" + 'Tot_Population_ACS_06_10' }, inplace = True )        
     del dataframe['Tot_Population_ACS_06_10']  
               
+              
+    del dataframe["Not_MrdCple_HHD_ACS_06_10"]   
     #denominator is Tot_Occp_Units_ACS_06_10
     acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
@@ -158,7 +160,7 @@ def transform_data( dataframe ):
                 "ENG_VW_ACS_06_10",
                 "Rel_Family_HHD_ACS_06_10",
                 "MrdCple_Fmly_HHD_ACS_06_10",
-                "Not_MrdCple_HHD_ACS_06_10", 
+                #"Not_MrdCple_HHD_ACS_06_10", 
                 "Female_No_HB_ACS_06_10",
                 "NonFamily_HHD_ACS_06_10",
                 "Sngl_Prns_HHD_ACS_06_10",
@@ -182,7 +184,6 @@ def transform_data( dataframe ):
                 "Tot_Vacant_Units_ACS_06_10",
                 "Aggr_House_Value_ACS_06_10",
                 ]
-
     for category in acs_households_to_normalize:
         dataframe[category] = dataframe[category]/acs_households
         dataframe.rename( columns = { category: category + "/" + "Tot_Occp_Units_ACS_06_10" }, inplace = True )
@@ -190,8 +191,13 @@ def transform_data( dataframe ):
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
-
-
+    
+    
+    
+    #we should reduce redundancy
+    del dataframe['Males_CEN_2010']
+    del dataframe['Not_MrdCple_HHD_CEN_2010']
+    del dataframe['Non_Inst_GQ_CEN_2010']
     
     #census
     census_population = dataframe['Tot_Population_CEN_2010'].astype(np.float64)
@@ -199,7 +205,6 @@ def transform_data( dataframe ):
         'URBANIZED_AREA_POP_CEN_2010',
         'URBAN_CLUSTER_POP_CEN_2010',
         'RURAL_POP_CEN_2010',
-        'Males_CEN_2010',
         'Females_CEN_2010',
         'Pop_under_5_CEN_2010', 
         'Pop_5_17_CEN_2010',
@@ -209,7 +214,7 @@ def transform_data( dataframe ):
         'Pop_65plus_CEN_2010',
         'Tot_GQ_CEN_2010',
         'Inst_GQ_CEN_2010',
-        'Non_Inst_GQ_CEN_2010', 
+        #'Non_Inst_GQ_CEN_2010', 
         'Hispanic_CEN_2010',
         'NH_White_alone_CEN_2010', 
         'NH_Blk_alone_CEN_2010',
@@ -223,12 +228,15 @@ def transform_data( dataframe ):
         dataframe.rename( columns = { category: category + "/" + 'Tot_Population_CEN_2010' }, inplace = True )
 
     del dataframe['Tot_Population_CEN_2010']     
-        
+    
+
+
+    del dataframe['Not_MrdCple_HHD_CEN_2010']
     census_households = dataframe['Tot_Occp_Units_CEN_2010'].astype(np.float64)
     census_hhd_to_normalize = [
         'Rel_Family_HHDS_CEN_2010',
         "MrdCple_Fmly_HHD_CEN_2010", 
-        "Not_MrdCple_HHD_CEN_2010",
+        #"Not_MrdCple_HHD_CEN_2010",
         'Female_No_HB_CEN_2010',
         'NonFamily_HHD_CEN_2010',
         'Sngl_Prns_HHD_CEN_2010',
