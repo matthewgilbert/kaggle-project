@@ -77,6 +77,9 @@ clean <- function(series) {
     #hack to add back in GidBG so don't have to change all the hardcoded indices above
     census.formatted.df = cbind('GIDBG'=census.df$GIDBG[keep], census.formatted.df)
 
+    #remove redundant categories, e.g. don't need number of males and number of females
+    redundant_index = grep("Females_CEN_2010|Females_ACS_06_10",names(census.formatted.index),invert=TRUE)
+
     if (series == 'training') {
         save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
         write.table(census.formatted.df,"formattedData.csv")
