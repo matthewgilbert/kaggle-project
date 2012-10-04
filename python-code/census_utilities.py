@@ -8,9 +8,9 @@ import bottleneck as bn
 
 
 def money2float(s):
-   #Converts "$XXX, YYY" to XXXYYY
+   #Converts "$XXX, YYY" to XXXYYY. Fuck it, lets log it too.
     try:
-        return float( s[1:].replace(",","") )
+        return np.log( float( s[1:].replace(",","") )) 
     except:
        return s
 
@@ -44,8 +44,6 @@ def preprocess_dataframe( dataframe, training=1 ):
     Use this to preprocess crossvalidation data and testing data.
     
     """
-    del dataframe[ dataframe.columns[0] ]
-    del dataframe[ dataframe.columns[0] ]    
     dataframe = generate_features( dataframe )
     
     #some data points are giving us problems, lets delete them. 
@@ -57,6 +55,9 @@ def preprocess_dataframe( dataframe, training=1 ):
 
 	#dataframe = dataframe.dropna(subset=['2000_response'])
 	print "New Size: %d"%dataframe.shape[0]
+   	del dataframe[ dataframe.columns[0] ]    
+    
+   	del dataframe[ dataframe.columns[0] ]    
     
     weights = None
     response = None
@@ -214,7 +215,6 @@ def transform_data( dataframe ):
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
-    Not_MrdCple_HHD_CEN_2010
     
     
     #we should reduce redundancy
@@ -350,8 +350,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
-    v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
-    ix = bn.argpartsort( v, K,axis=None)
+    ix = bn.argpartsort( (( location_data - np.array( [lat, long] )  )**2).sum(axis=1), K, axis=None)
     return ix[:K]
     
 

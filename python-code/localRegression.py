@@ -25,7 +25,7 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, regressor = LinearRegression, params={}, scale=True, response_f = identity, inv_response_f = identity ):
+    def __init__(self, k = 200, regressor = LinearRegression, verbose=False, params={}, scale=True, response_f = identity, inv_response_f = identity ):
         self.k = k
         self.regressor = regressor
 	self.params = params    
@@ -35,6 +35,7 @@ class LocalRegression( object ):
 	self.response_f = response_f
 	self.inv_response_f = inv_response_f
 	self.zero_coef_ = np.zeros( 10000 )
+        self.verbose = verbose
    
     def __str__(self):
 	return "%dK%sLocalRegression"%(self.k, self.regressor.__name__.replace(" ", "" ))
@@ -69,7 +70,7 @@ class LocalRegression( object ):
         prediction = np.empty( n)
 	location_data = location_data.values
         for i in range(n):
-	    if i%100 == 0:
+	    if ( self.verbose and i%100 == 0):
 	    	print i	
             location = location_data[i,:] 
       	    if np.any( pandas.isnull( location ) ):
@@ -77,6 +78,12 @@ class LocalRegression( object ):
 
 	    else:
 	    	inx = self.gnn.find( location[0], location[1], self.k )
+
+		#new_data = self.data_[inx,:]
+		#CEN = new_data[ [ s for s in new_data.columns if "ACS" not in x] ]
+		#ACS = new_data[ [ s for s in new_data.columns if "ACS" in x] ]
+		#for i in range( len( ACS.columns) )
+		
           	reg.fit(  self.data_[inx,:] , self.response_f( self.response_[inx,:] ) )
 		try:
 		    self.zero_coef_[ np.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
