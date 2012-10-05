@@ -50,8 +50,10 @@ clean <- function(series) {
     acs_house_index = setdiff(acs_index, acs_pop_index)
 
     no_pop_index = which(census.formatted.df[,acs_totalPop_index] == 0)
-    keep = setdiff(1:nrow(census.formatted.df), no_pop_index)
-    census.formatted.df = census.formatted.df[keep,]
+    census.formatted.df[no_pop_index, acs_totalPop_index] = Inf    
+#    keep = setdiff(1:nrow(census.formatted.df), no_pop_index)
+#    census.formatted.df = census.formatted.df[keep,]
+    
 
     census.formatted.df[,acs_pop_index] = census.formatted.df[,acs_pop_index] / census.formatted.df[,acs_totalPop_index]
     unformatted_index = setdiff(unformatted_index,acs_pop_index)
@@ -73,9 +75,9 @@ clean <- function(series) {
 
     #hack to add in geo coordinates
     locations <- read.csv(file = paste(series, "_locations.csv", sep=''))
-    census.formatted.df = cbind('LATITUDE'=locations[keep,1], 'LONGITUDE'=locations[keep,2], census.formatted.df)
+    census.formatted.df = cbind('LATITUDE'=locations[,1], 'LONGITUDE'=locations[,2], census.formatted.df)
     #hack to add back in GidBG so don't have to change all the hardcoded indices above
-    census.formatted.df = cbind('GIDBG'=census.df$GIDBG[keep], census.formatted.df)
+    census.formatted.df = cbind('GIDBG'=census.df$GIDBG, census.formatted.df)
 
     #remove redundant categories, e.g. don't need number of males and number of females
     redundant_index = grep("Females_CEN_2010|Females_ACS_06_10",names(census.formatted.index),invert=TRUE)
