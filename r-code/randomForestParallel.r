@@ -20,6 +20,6 @@ test.data = test.census.formatted.df[,index_test]
 predictions = predict(fit.rf, test.data)
 proc.time()
 ####Write predictions submission file#######
-write.table(predictions,"RF-PredictionsParallel.csv",row.names = FALSE)
-
-save.image(file="rfParallel.RData")
+dir.create('Results')
+write.table(predictions,"Results/RF-PredictionsParallel.csv",row.names = FALSE)
+save.image(file="Results/rfParallel.RData")
