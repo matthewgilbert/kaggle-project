@@ -74,7 +74,7 @@ clean <- function(series) {
     census.formatted.df[,nonACS_pop_index] = census.formatted.df[,nonACS_pop_index] / census.formatted.df[,totalPop_index]
 
     #hack to add in geo coordinates
-    locations <- read.csv(file = paste(series, "_locations.csv", sep=''))
+    locations <- read.csv(file = paste(series, "_locations.csv", sep=''), header=FALSE)
     census.formatted.df = cbind('LATITUDE'=locations[,1], 'LONGITUDE'=locations[,2], census.formatted.df)
     #hack to add back in GidBG so don't have to change all the hardcoded indices above
     census.formatted.df = cbind('GIDBG'=census.df$GIDBG, census.formatted.df)
