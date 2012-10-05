@@ -1,3 +1,6 @@
+#run on server with
+#R --no-save <~/kaggle-project/r-code/randomForestParallel.r > RFlog.out 2>&1 &
+
 ####Fit RF Model############
 library(randomForest)
 library(foreach)
@@ -18,3 +21,5 @@ predictions = predict(fit.rf, test.data)
 proc.time()
 ####Write predictions submission file#######
 write.table(predictions,"RF-PredictionsParallel.csv",row.names = FALSE)
+
+save.image(file="rfParallel.RData")
