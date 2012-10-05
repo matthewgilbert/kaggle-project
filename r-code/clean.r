@@ -82,6 +82,9 @@ clean <- function(series) {
     #remove redundant categories, e.g. don't need number of males and number of females
     redundant_index = grep("Females_CEN_2010|Females_ACS_06_10",names(census.formatted.df),invert=TRUE)
 
+    #reset empty regions from Inf to 0
+    census.formatted.df[no_pop_index, acs_totalPop_index] = 0    
+
     if (series == 'training') {
         save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
         write.table(census.formatted.df,"formattedData.csv")
