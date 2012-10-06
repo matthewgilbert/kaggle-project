@@ -132,7 +132,7 @@ def transform_data( dataframe ):
     del dataframe["NH_Asian_alone_ACS_06_10"]
     del dataframe["NH_NHOPI_alone_ACS_06_10"]
     del dataframe["NH_SOR_alone_ACS_06_10"]
-    
+    del dataframe["Pop_5yrs_Over_ACS_06_10"]
     acs_population = dataframe['Tot_Population_ACS_06_10'].astype(np.float64)
     acs_populations_to_normalize = [
         #    "Males_ACS_06_10",
@@ -150,7 +150,7 @@ def transform_data( dataframe ):
                 #"NH_Asian_alone_ACS_06_10",
             #"NH_NHOPI_alone_ACS_06_10",
             #"NH_SOR_alone_ACS_06_10",
-            "Pop_5yrs_Over_ACS_06_10",
+            #"Pop_5yrs_Over_ACS_06_10",
               "Othr_Lang_ACS_06_10",
               "Pop_25yrs_Over_ACS_06_10",
               "Prs_Blw_Pov_Lev_ACS_06_10",
@@ -173,7 +173,9 @@ def transform_data( dataframe ):
     del dataframe["Sngl_Prns_HHD_ACS_06_10"]   
     del dataframe["MrdCple_Fmly_HHD_ACS_06_10"]   
     del dataframe["Rel_Child_Under_6_ACS_06_10"]   
-    del dataframe["Female_No_HB_ACS_06_10"]   
+    del dataframe["Female_No_HB_ACS_06_10"]
+    del dataframe["Tot_Housing_Units_ACS_06_10"] 
+    del dataframe["HHD_PPL_Und_18_ACS_06_10"]  
     #denominator is Tot_Occp_Units_ACS_06_10
     acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
@@ -188,13 +190,13 @@ def transform_data( dataframe ):
                 #"Female_No_HB_ACS_06_10",
                 #"NonFamily_HHD_ACS_06_10",
                 #"Sngl_Prns_HHD_ACS_06_10",
-                "HHD_PPL_Und_18_ACS_06_10", 
+                #"HHD_PPL_Und_18_ACS_06_10", 
                 #"Tot_Prns_in_HHD_ACS_06_10",
                 #"Rel_Child_Under_6_ACS_06_10",
                 "HHD_Moved_in_ACS_06_10", 
                 "PUB_ASST_INC_ACS_06_10", 
                 "Aggregate_HH_INC_ACS_06_10",
-                "Tot_Housing_Units_ACS_06_10",
+                #"Tot_Housing_Units_ACS_06_10",
                 #"Renter_Occp_HU_ACS_06_10", 
                 #"Owner_Occp_HU_ACS_06_10",
                 "Single_Unit_ACS_06_10",
@@ -350,8 +352,11 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
-    ix = bn.argpartsort( (( location_data - np.array( [lat, long] )  )**2).sum(axis=1), K, axis=None)
-    return ix[:K]
+    v =  (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
+    ix = bn.argpartsort( v, K, axis=None)[:K]
+    ix2 =ix[ np.nonzero( v[ix] < 100)]
+    ix2 = np.append( ix2, np.random.randint(0, location_data.shape[0], (1, K - ix2.shape[0] )  )  )
+    return ix2
     
 
     

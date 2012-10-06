@@ -78,7 +78,6 @@ class LocalRegression( object ):
 
 	    else:
 	    	inx = self.gnn.find( location[0], location[1], self.k )
-
 		#new_data = self.data_[inx,:]
 		#CEN = new_data[ [ s for s in new_data.columns if "ACS" not in x] ]
 		#ACS = new_data[ [ s for s in new_data.columns if "ACS" in x] ]
@@ -86,6 +85,8 @@ class LocalRegression( object ):
 		
           	reg.fit(  self.data_[inx,:] , self.response_f( self.response_[inx,:] ) )
 		try:
+		    if self.verbose:
+			print reg.coef_[:5]
 		    self.zero_coef_[ np.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
 		except:
 		    pass

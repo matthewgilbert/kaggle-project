@@ -34,8 +34,9 @@ training_data, training_location_data, training_response, training_weights = pre
 
 ### CREATE MODEL ###
 #lr = lclR.LocalRegression( k = 1000 )
+from sklearn.ensemble import RandomForestRegressor as rfr
 
-lr = lclR.LocalRegression(k = 1000, regressor = SmartSVR, verbose = True, params={'cache_size':20000, 'gamma':0.0001, 'verbose':False}, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x) )
+lr = lclR.LocalRegression(k = 750, regressor = rfr, verbose = True, params={'n_jobs':-1, 'n_estimators':50}, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x) )
 
 lr.fit( training_data, training_response, training_location_data )
 prediction = lr.predict( test_data, test_location_data )
@@ -43,5 +44,5 @@ prediction = lr.predict( test_data, test_location_data )
 #prediction[ prediction > 100 ] = 99
 #prediction[ prediction < 0 ] = 5
 np.savetxt( "LatestSubmission.csv", prediction, delimiter= "," )
-print file_name, " COMPLETE." 
+print " COMPLETE." 
 
