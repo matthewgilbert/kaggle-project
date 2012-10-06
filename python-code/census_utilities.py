@@ -217,6 +217,7 @@ def transform_data( dataframe ):
     del dataframe['Tot_Occp_Units_ACS_06_10']
     
     
+
     
     
     #we should reduce redundancy
