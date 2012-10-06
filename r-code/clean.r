@@ -49,13 +49,13 @@ clean <- function(series) {
     acs_pop_index = acs_index[(acs_index <= 49)]
     acs_house_index = setdiff(acs_index, acs_pop_index)
 
-    no_pop_index = which(census.formatted.df[,acs_totalPop_index] == 0)
-    census.formatted.df[no_pop_index, acs_totalPop_index] = Inf    
+    no_pop_index = which(census.formatted.df$Tot_Population_ACS_06_10 == 0)
+    census.formatted.df$Tot_Population_ACS_06_10[no_pop_index] = Inf    
 #    keep = setdiff(1:nrow(census.formatted.df), no_pop_index)
 #    census.formatted.df = census.formatted.df[keep,]
     
 
-    census.formatted.df[,acs_pop_index] = census.formatted.df[,acs_pop_index] / census.formatted.df[,acs_totalPop_index]
+    census.formatted.df[,acs_pop_index] = census.formatted.df[,acs_pop_index] / census.formatted.df$Tot_Population_ACS_06_10
     unformatted_index = setdiff(unformatted_index,acs_pop_index)
 
     census.formatted.df[,acs_house_index] = census.formatted.df[,acs_house_index] / census.formatted.df[,acs_totalHouse_index]
@@ -83,7 +83,7 @@ clean <- function(series) {
     redundant_index = grep("Females_CEN_2010|Females_ACS_06_10",names(census.formatted.df),invert=TRUE)
 
     #reset empty regions from Inf to 0
-    census.formatted.df[no_pop_index, acs_totalPop_index] = 0    
+    census.formatted.df$Tot_Population_ACS_06_10[no_pop_index] = 0    
 
     if (series == 'training') {
         save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
