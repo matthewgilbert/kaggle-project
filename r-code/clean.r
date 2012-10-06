@@ -49,11 +49,13 @@ clean <- function(series) {
     acs_pop_index = acs_index[(acs_index <= 49)]
     acs_house_index = setdiff(acs_index, acs_pop_index)
 
-    no_pop_index = which(census.formatted.df[,acs_totalPop_index] == 0)
-    keep = setdiff(1:nrow(census.formatted.df), no_pop_index)
-    census.formatted.df = census.formatted.df[keep,]
+    no_pop_index = which(census.formatted.df$Tot_Population_ACS_06_10 == 0)
+    census.formatted.df$Tot_Population_ACS_06_10[no_pop_index] = Inf    
+#    keep = setdiff(1:nrow(census.formatted.df), no_pop_index)
+#    census.formatted.df = census.formatted.df[keep,]
+    
 
-    census.formatted.df[,acs_pop_index] = census.formatted.df[,acs_pop_index] / census.formatted.df[,acs_totalPop_index]
+    census.formatted.df[,acs_pop_index] = census.formatted.df[,acs_pop_index] / census.formatted.df$Tot_Population_ACS_06_10
     unformatted_index = setdiff(unformatted_index,acs_pop_index)
 
     census.formatted.df[,acs_house_index] = census.formatted.df[,acs_house_index] / census.formatted.df[,acs_totalHouse_index]
@@ -72,20 +74,28 @@ clean <- function(series) {
     census.formatted.df[,nonACS_pop_index] = census.formatted.df[,nonACS_pop_index] / census.formatted.df[,totalPop_index]
 
     #hack to add in geo coordinates
-    locations <- read.csv(file = paste(series, "_locations.csv", sep=''))
-    census.formatted.df = cbind('LATITUDE'=locations[keep,1], 'LONGITUDE'=locations[keep,2], census.formatted.df)
+    locations <- read.csv(file = paste(series, "_locations.csv", sep=''), header=FALSE)
+    census.formatted.df = cbind('LATITUDE'=locations[,1], 'LONGITUDE'=locations[,2], census.formatted.df)
     #hack to add back in GidBG so don't have to change all the hardcoded indices above
-    census.formatted.df = cbind('GIDBG'=census.df$GIDBG[keep], census.formatted.df)
+    census.formatted.df = cbind('GIDBG'=census.df$GIDBG, census.formatted.df)
+
+    #remove redundant categories, e.g. don't need number of males and number of females
+    redundant_index = grep("Females_CEN_2010|Females_ACS_06_10",names(census.formatted.df),invert=TRUE)
+
+    #reset empty regions from Inf to 0
+    census.formatted.df$Tot_Population_ACS_06_10[no_pop_index] = 0    
 
     if (series == 'training') {
         save(census.df, census.cleaned.df, census.formatted.df, file = 'cleaned.dat')
-        write.table(census.formatted.df,"formattedData")
+        write.table(census.formatted.df,"formattedData.csv")
+        sprintf("The file cleaned.dat and formattedData.csv were printed to %s", getwd())
     } else if (series == 'test') {
         test.census.df = census.df
         test.census.cleaned.df = census.cleaned.df
         test.census.formatted.df = census.formatted.df
         save(test.census.df, test.census.cleaned.df, test.census.formatted.df, file = 'cleanedtest.dat')
-        write.table(test.census.formatted.df,"formattedDatatest")
+        write.table(test.census.formatted.df,"formattedDatatest.csv")
+        sprintf("The file cleanedtest.dat and formattedDatatest.csv were printed to %s", getwd())
     }
 
 }
