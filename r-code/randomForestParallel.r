@@ -4,7 +4,9 @@
 ####Fit RF Model############
 library(randomForest)
 library(foreach)
+library(doMC)
 
+registerDoMC()
 load("cleaned.dat")
 index_train = grep("GIDBG|LATITUDE|LONGITUDE|weight", names(census.formatted.df), invert=TRUE)
 data = census.formatted.df[,index_train]
