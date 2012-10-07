@@ -1,6 +1,12 @@
 #quadratic variable selection
 
 
+
+#
+# TODO: See if the coefficents of LR change much across the groups.
+
+#
+
 from itertools import combinations
 
 execfile("data_exploring.py")
@@ -22,9 +28,9 @@ for col_pos, comb in enumerate( combinations( range(d), 2) ):
     
 
     
-lr = sklm.Lasso( alpha = .001, normalize = True)
+lr = sklm.Lasso( alpha = .005, normalize = True)
 lr.fit( qdata, response)
 
-print "Percent of variables selected: %.2f"%( float(np.nonzero( lr.coef_ ).shape[0])/(d*(d-1)/2) )
+print "Percent of variables selected: %.2f"%( float(np.nonzero( lr.coef_ )[0].shape[0])/(d*(d-1)/2) )
 print "indexes:"
 print np.nonzero( lr.coef_ )
