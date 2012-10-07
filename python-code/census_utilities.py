@@ -35,6 +35,15 @@ def generate_features( dataframe ):
 
     #dataframe['Diff_Of_Spanish_CEN_Prop_to_Spanish_Ballot_Prop'] = dataframe['Hispanic_CEN_2010']/(dataframe['Tot_Population_CEN_2010'] ).astype( np.float64) - dataframe['BILQ_Mailout_count_CEN_2010']/(dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
     
+    #these were shown to be interesting in lasso 
+    dataframe['Pop_under_5_CEN_2010*Pop_18_24_CEN_2010'] = dataframe['Pop_under_5_CEN_2010/Tot_Population_CEN_2010']*dataframe['Pop_18_24_CEN_2010/Tot_Population_CEN_2010']
+    dataframe['Pop_25_44_CEN_2010*Female_No_HB_CEN_2010'] = dataframe['Pop_25_44_CEN_2010/Tot_Population_CEN_2010']*dataframe['Female_No_HB_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['Pop_65plus_CEN_2010*MrdCple_Fmly_HHD_CEN_2010'] = dataframe['Pop_65plus_CEN_2010/Tot_Population_CEN_2010']*dataframe['MrdCple_Fmly_HHD_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['NH_White_alone_CEN_2010*Owner_Occp_HU_CEN_2010'] = dataframe['NH_White_alone_CEN_2010/Tot_Population_CEN_2010']*dataframe['Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['Tot_Prns_in_HHD_CEN_2010*Renter_Occp_HU_CEN_2010'] = dataframe['Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010']*dataframe['Renter_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['Owner_Occp_HU_CEN_2010*2000_response'] = dataframe['Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010']*dataframe['2000_response']
+
+    
     return dataframe
  
  
