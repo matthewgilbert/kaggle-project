@@ -53,7 +53,6 @@ def preprocess_dataframe( dataframe, training=1 ):
     Use this to preprocess crossvalidation data and testing data.
     
     """
-    dataframe = generate_features( dataframe )
     
     #some data points are giving us problems, lets delete them. 
     if training:
@@ -292,6 +291,7 @@ def transform_data( dataframe ):
     #for some reason, there are some places that just suck at reporting good data.
     dataframe.fillna( 0, inplace = True )    
     
+    dataframe = generate_features( dataframe )
     return dataframe
 
 
