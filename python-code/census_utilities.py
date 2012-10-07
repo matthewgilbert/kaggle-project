@@ -36,6 +36,16 @@ def generate_features( dataframe ):
     #dataframe['Diff_Of_Spanish_CEN_Prop_to_Spanish_Ballot_Prop'] = dataframe['Hispanic_CEN_2010']/(dataframe['Tot_Population_CEN_2010'] ).astype( np.float64) - dataframe['BILQ_Mailout_count_CEN_2010']/(dataframe['Tot_Occp_Units_CEN_2010'] ).astype( np.float64)
     
     #these were shown to be interesting in lasso 
+    dataframe['Pop_under_5_CEN_2010*Pop_18_24_CEN_2010'] = dataframe['Pop_under_5_CEN_2010/Tot_Population_CEN_2010']*dataframe['Pop_18_24_CEN_2010/Tot_Population_CEN_2010']
+    dataframe['Pop_25_44_CEN_2010*Female_No_HB_CEN_2010'] = dataframe['Pop_25_44_CEN_2010/Tot_Population_CEN_2010']*dataframe['Female_No_HB_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['Pop_65plus_CEN_2010*MrdCple_Fmly_HHD_CEN_2010'] = dataframe['Pop_65plus_CEN_2010/Tot_Population_CEN_2010']*dataframe['MrdCple_Fmly_HHD_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['NH_White_alone_CEN_2010*Owner_Occp_HU_CEN_2010'] = dataframe['NH_White_alone_CEN_2010/Tot_Population_CEN_2010']*dataframe['Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['Tot_Prns_in_HHD_CEN_2010*Renter_Occp_HU_CEN_2010'] = dataframe['Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010']*dataframe['Renter_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010']
+    dataframe['Owner_Occp_HU_CEN_2010*2000_response'] = dataframe['Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010']*dataframe['2000_response']
+    
+    
+    
+    
     dataframe["RURAL_POP_CEN_2*Hispanic_CEN_20"] = dataframe["RURAL_POP_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["RURAL_POP_CEN_2*Prs_Blw_Pov_Lev"] = dataframe["RURAL_POP_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Prs_Blw_Pov_Lev_ACS_06_10/Tot_Population_ACS_06_10"]
     dataframe["Females_CEN_201*2000_response"] = dataframe["Females_CEN_2010/Tot_Population_CEN_2010"]*dataframe["2000_response"]
@@ -80,7 +90,6 @@ def generate_features( dataframe ):
     dataframe["Tot_Housing_Uni*Pop_25_44_CEN_2"] = dataframe["Tot_Housing_Units_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["Pop_25_44_CEN_2010*Female_No_HB_CEN_2010"]
     dataframe["MLT_U2_9_STRC_A*Pop_25_44_CEN_2"] = dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"]*dataframe["Pop_25_44_CEN_2010*Female_No_HB_CEN_2010"]
 
-
     
     return dataframe
  
@@ -96,22 +105,22 @@ def preprocess_dataframe( dataframe, training=1 ):
     #some data points are giving us problems, lets delete them. 
     if training:
         print "dropping some data points."
-    print "Previous size: %d"%dataframe.shape[0]
+        print "Previous size: %d"%dataframe.shape[0]
         ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
         dataframe = dataframe.drop( ix )
 
     #dataframe = dataframe.dropna(subset=['2000_response'])
     print "New Size: %d"%dataframe.shape[0]
-       del dataframe[ dataframe.columns[0] ]    
+    del dataframe[ dataframe.columns[0] ]    
     
-       del dataframe[ dataframe.columns[0] ]    
+    del dataframe[ dataframe.columns[0] ]    
     
     weights = None
     response = None
     location_data = dataframe[ ['LATITUDE', 'LONGITUDE'] ] 
     if training:
-        response = dataframe['Mail_Return_Rate_CEN_2010']
-        weights = dataframe['weight']
+    	response = dataframe['Mail_Return_Rate_CEN_2010']
+    	weights = dataframe['weight']
  
     
     to_remove = ['TEA_Mail_Out_Mail_Back_CEN_2010','TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
@@ -138,7 +147,7 @@ def preprocess_dataframe( dataframe, training=1 ):
        try:
          dataframe[to_cn] = dataframe[to_cn].map( money2float )
        except:
-     pass 
+        pass 
 
      
     for col_name in dataframe.columns:
@@ -365,12 +374,12 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         testing_location = []
 
     fit_args = [ training_data, training_response] + training_location
-    predict_args = [ testing_data ] + testing_location    
+    predict_args = [ testing_data ] + testing_location	
 
-        model.fit( *fit_args )
-        prediction = model.predict( *predict_args )
-        cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
-    
+    model.fit( *fit_args )
+    prediction = model.predict( *predict_args )
+    cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
+	
 
     print "CV %i: Test accuracy: %0.2f (+/- %0.2f)" % (i, cv_scores[:i].mean(), cv_scores[:i].std() / 2)
     print cv_scores[:i+1]        
@@ -381,11 +390,11 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
             except:
                     pass
             
-        predict_args = [ training_data[:n_testing_data] ] + training_location        
-            training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[:n_testing_data], training_weights[:n_testing_data])
-        print "CV %i: Train accuracy: %0.2f (+/- %0.2f)" % (i, training_scores[:i].mean(), training_scores[:i].std() / 2)
-    print "--------------------------------"
-        i += 1 
+            predict_args = [ training_data[:n_testing_data] ] + training_location        
+            raining_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[:n_testing_data], training_weights[:n_testing_data])
+            print "CV %i: Train accuracy: %0.2f (+/- %0.2f)" % (i, training_scores[:i].mean(), training_scores[:i].std() / 2)
+	print "--------------------------------"
+    i += 1 
 
 
     print "Test accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
