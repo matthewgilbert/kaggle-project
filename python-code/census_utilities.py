@@ -5,6 +5,7 @@ import numpy as np
 import pandas
 from sklearn.cross_validation import KFold
 import bottleneck as bn
+import scipy.stats as stats
 
 
 def money2float(s):
@@ -108,11 +109,11 @@ def preprocess_dataframe( dataframe, training=1 ):
         ix = np.nonzero( dataframe['Tot_Population_ACS_06_10'] == 0)[0]
         dataframe = dataframe.drop( ix )
 
-    #dataframe = dataframe.dropna(subset=['2000_response'])
-    print "New Size: %d"%dataframe.shape[0]
-    del dataframe[ dataframe.columns[0] ]    
+    	#dataframe = dataframe.dropna(subset=['2000_response'])
+    	print "New Size: %d"%dataframe.shape[0]
+    	del dataframe[ dataframe.columns[0] ]    
     
-    del dataframe[ dataframe.columns[0] ]    
+    	del dataframe[ dataframe.columns[0] ]    
     
     weights = None
     response = None
@@ -338,7 +339,7 @@ def transform_data( dataframe ):
     #for some reason, there are some places that just suck at reporting good data.
     dataframe.fillna( 0, inplace = True )    
     
-    dataframe = generate_features( dataframe )
+    #dataframe = generate_features( dataframe )
     return dataframe
 
 
@@ -357,35 +358,32 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
     training_scores = np.empty( K) 
     i = 1
     for train, test in kf:
-
         training_data = data[ train]
         training_response = response[ train ]
         
         testing_data = data[test]
         testing_response = response[test]
-
         testing_weights = weights[ test ]
         training_weights = weights[ train ]
 
-    if len(location_data) > 0:
-        training_location = [ location_data[train] ]
-        testing_location = [ location_data[test] ]
+        if len(location_data) > 0:
+    	    training_location = [ location_data[train] ]
+            testing_location = [ location_data[test] ]
 
-    else:
-        training_location = []
-        testing_location = []
+    	else:
+        	training_location = []
+        	testing_location = []
 
-    fit_args = [ training_data, training_response] + training_location
-    predict_args = [ testing_data ] + testing_location	
+   	fit_args = [ training_data, training_response] + training_location
+    	predict_args = [ testing_data ] + testing_location	
 
-    model.fit( *fit_args )
-    prediction = model.predict( *predict_args )
-    cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
+    	model.fit( *fit_args )
+    	prediction = model.predict( *predict_args )
+    	cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
 	
 
-    print "CV %i: Test accuracy: %0.2f (+/- %0.2f)" % (i, cv_scores[:i].mean(), cv_scores[:i].std() / 2)
-    print cv_scores[:i+1]        
-    if report_training:
+    	print "CV %i: Test accuracy: %s" % (i, create_confidence_interval( cv_scores[:i], 0.95))        
+    	if report_training:
             n_testing_data = testing_response.shape[0]
             try:
                     training_location[0] = training_location[0][:n_testing_data] 
@@ -393,10 +391,10 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
                     pass
             
             predict_args = [ training_data[:n_testing_data] ] + training_location        
-            raining_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[:n_testing_data], training_weights[:n_testing_data])
-            print "CV %i: Train accuracy: %0.2f (+/- %0.2f)" % (i, training_scores[:i].mean(), training_scores[:i].std() / 2)
-	print "--------------------------------"
-    i += 1 
+            training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[:n_testing_data], training_weights[:n_testing_data])
+            print "CV %i: Train accuracy: %s" % (i, create_confidence_interval(training_scores[:i], 0.95) )
+    	print "--------------------------------"
+    	i += 1 
 
 
     print "Test accuracy: %0.2f (+/- %0.2f)" % (cv_scores.mean(), cv_scores.std() / 2)
@@ -405,7 +403,15 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         print "Train accuracy: %0.2f (+/- %0.2f)" % (training_scores.mean(), training_scores.std() / 2)
 
     
-        
+def create_confidence_interval( array, alpha):
+     
+     td = stats.t
+ 
+     n = array.shape[0]
+     mu = array.mean()
+     ci_width = td.interval(alpha, n)[1]*array.std()/np.sqrt(n)	
+     
+     return "%0.3f ( +- %0.3f)"%(mu, ci_width)	
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
