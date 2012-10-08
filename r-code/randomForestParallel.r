@@ -1,17 +1,17 @@
 #run on server with
-#R --no-save <~/kaggle-project/r-code/randomForestParallel.r > RFlog.out 2>&1 &
+#R --no-save <~/kaggle-project/r-code/randomForestParallel.r > RFParallelLog.out 2>&1 &
 
 ####Fit RF Model############
 library(randomForest)
 library(foreach)
 library(doMC)
 
-registerDoMC()
+registerDoMC(32)
 load("cleaned.dat")
 index_train = grep("GIDBG|LATITUDE|LONGITUDE|weight", names(census.formatted.df), invert=TRUE)
 data = census.formatted.df[,index_train]
 
-fit.rf <- foreach(ntree=rep(25, 10), .combine=combine, .packages='randomForest') %dopar% {
+fit.rf <- foreach(ntree=rep(16, 32), .combine=combine, .packages='randomForest') %dopar% {
     randomForest(Mail_Return_Rate_CEN_2010 ~ ., data=data, ntree=ntree )
 }
 proc.time()
@@ -24,4 +24,4 @@ proc.time()
 ####Write predictions submission file#######
 dir.create('Results')
 write.table(predictions,"Results/RF-PredictionsParallel.csv",row.names = FALSE)
-save.image(file="Results/rfParallel.RData")
+save(fit.rf, file="Results/rfParallel.RData")
