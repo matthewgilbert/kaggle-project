@@ -13,6 +13,8 @@ import geoNN
 import localRegression as lclR
 
 
+np.set_printoptions( precision = 3 )
+
 training_file = "TrainingData.csv"
 #try unpickling:
 try:

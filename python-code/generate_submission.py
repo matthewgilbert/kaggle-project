@@ -22,7 +22,7 @@ test_data, test_location_data, test_response, test_weights = preprocess_datafram
 del test_data[ test_data.columns[0] ] 
 print "Test data cleaned."
 
-
+print "Shape: ", test_data.shape
 #get training_data
 
 training_data = pandas.load( "../TrainingData.pickle" )
@@ -32,16 +32,20 @@ print "Training data in."
 #training_weights = training_data['weight']
 training_data, training_location_data, training_response, training_weights = preprocess_dataframe( training_data)
 
+print "Shape: ", training_data.shape
+
 ### CREATE MODEL ###
 #lr = lclR.LocalRegression( k = 1000 )
+#from sklearn.ensemble import RandomForestRegressor as rfr
 
-lr = lclR.LocalRegression(k = 1000, regressor = SmartSVR, verbose = True, params={'cache_size':20000, 'gamma':0.0001, 'verbose':False}, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x) )
+#lr = lclR.LocalRegression(k = 1000, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = SmartSVR, params = {'gamma':0.0001})
+lr = lclR.LocalRegression(k = 1000, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = sklm.ElasticNet, params = {'alpha':0.00005, 'rho':0.8})
 
 lr.fit( training_data, training_response, training_location_data )
 prediction = lr.predict( test_data, test_location_data )
 #remove >100s and <0s
 #prediction[ prediction > 100 ] = 99
 #prediction[ prediction < 0 ] = 5
-np.savetxt( "LatestSubmission.csv", prediction, delimiter= "," )
-print file_name, " COMPLETE." 
+np.savetxt( "LatestSubmissionElNetQuad.csv", prediction, delimiter= "," )
+print " COMPLETE." 
 
