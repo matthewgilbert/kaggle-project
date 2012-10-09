@@ -366,6 +366,9 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
 
     	model.fit( *fit_args )
     	prediction = model.predict( *predict_args )
+	
+	#try the James Stein stat
+#	prediction = JamesSteinStat( prediction, training_response.std()/4, training_response.mean() )	
     	cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
 	
 
@@ -408,6 +411,16 @@ def find_geo_NN( lat, long, location_data, K = 1 ):
     ix2 = np.append( ix2, np.random.randint(0, location_data.shape[0], (1, K - ix2.shape[0] )  )  )
     return ix2
     
+def JamesSteinStat( predictions, global_std, global_mean ):
+	n = predictions.shape[0]
+	
+	c = 1 - float((n-3))*global_std**2/( ( predictions - predictions.mean() )**2).sum()
+	print c
+	return global_mean + c*( predictions - global_mean )
+
+	
+
+
 
     
 
