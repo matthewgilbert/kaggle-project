@@ -361,7 +361,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         	training_location = []
         	testing_location = []
 
-   	fit_args = [ training_data, training_response] + training_location
+        fit_args = [ training_data, training_response] + training_location
     	predict_args = [ testing_data ] + testing_location	
 
     	model.fit( *fit_args )
