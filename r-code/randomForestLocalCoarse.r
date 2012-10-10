@@ -64,7 +64,7 @@ predictions <- foreach(index = (1:coreUse), .combine=c, .packages='randomForest'
                 j = 1
                 lower_lim = partition*(index-1)+1
                 upper_lim = partition*index
-                for (i in (lower_lim:upper_lim) {        
+                for (i in (lower_lim:upper_lim)) {        
                     fit.rf <- randomForest(Mail_Return_Rate_CEN_2010 ~ ., data=train_data[closest_indices[i,],])
                     int_predictions[j] = predict(fit.rf, test_data[i,])
                     j = j+1
@@ -75,7 +75,7 @@ proc.time()
 
 ####Write predictions submission file#######
 dir.create('Results')
-write.table(predictions,"Results/RF-PredictionsParallel.csv",row.names = FALSE)
+write.table(predictions,"Results/RF-PredictionsLocal.csv",row.names = FALSE)
 
 
 
