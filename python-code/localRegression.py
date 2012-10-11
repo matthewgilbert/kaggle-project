@@ -8,6 +8,7 @@ import pp
 import census_utilities
 import geoNN
 
+from sklearn.feature_selection import SelectPercentile, f_regression
 
 
 def identity(x):
@@ -25,7 +26,8 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, ncpus=1, parallel = False, regressor = LinearRegression, verbose=False, params={}, response_f = identity, inv_response_f = identity ):
+    def __init__(self, k = 200, ncpus=1, parallel = False, feature_selection = False, regressor = LinearRegression, verbose=False, params={}, response_f = identity, inv_response_f = identity ):
+
         self.k = k           
         self.ncpus = ncpus
         self.parallel = parallel
@@ -33,7 +35,8 @@ class LocalRegression( object ):
         self.inv_response_f = inv_response_f
         self.zero_coef_ = numpy.zeros( 10000 )
         self.verbose = verbose
-        
+        self.feature_selection = feature_selection
+        self.selector = SelectPercentile( f_regression, 50 )
         #if regressor is a list of regressor, we need to initialize all of them
         if type( regressor ) == list:
             self.regressor = [ self.regressor[i](**params[i]) for i in range( len(regressor) ) ]
@@ -87,7 +90,8 @@ class LocalRegression( object ):
         except:
             pass
         #reg = self.regressor(**self.params)
-        prediction = numpy.zero( n)
+        prediction = np.zeros( n)
+
         location_data = location_data.values
         for i in range(n):    
             location = location_data[i,:] 
@@ -95,15 +99,21 @@ class LocalRegression( object ):
                 prediction[i] =  self.response_.mean()    
             else:
                 inx = self.gnn.find( location[0], location[1], self.k )
+		sub_data = self.data_[inx,:]
+		sub_response = self.response_f( self.response_[inx,:] )
+		if self.feature_selection:
+			sub_data = self.selector.fit_transform( self.data_[inx,:], sub_response )
+			to_predict = self.selector.transform( data[i,:] )
                 for reg in self.regressor:    
-                    reg.fit(  self.data_[inx,:] , self.response_f( self.response_[inx,:] ) )
+                    reg.fit(  sub_data , sub_response )
                 
                 try:
                     self.zero_coef_[ numpy.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
                 except:
                     pass
                 #take the average 
-                prediction[i] = numpy.array(  [ reg.predict( data[i,:] ) for reg in self.regressor] ).mean()
+
+                prediction[i] = np.array(  [ reg.predict( to_predict ) for reg in self.regressor] ).mean()
         #make sure everything is inside [0-100]
         prediction = self.inv_response_f( prediction )
         prediction[ prediction > 100 ] = 99	
