@@ -39,7 +39,7 @@ print "Shape: ", training_data.shape
 from sklearn.ensemble import RandomForestRegressor as rfr
 
 #lr = lclR.LocalRegression(k = 1000, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = SmartSVR, params = {'gamma':0.0001})
-lr = lclR.LocalRegression(k = 800, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = rfr, params = {'n_jobs':-1, 'n_estimators':99})
+lr = lclR.LocalRegression(k = 800, feature_selection=True, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = rfr, params = {'n_jobs':32, 'n_estimators':99})
 
 lr.fit( training_data, training_response, training_location_data )
 prediction = lr.predict( test_data, test_location_data )

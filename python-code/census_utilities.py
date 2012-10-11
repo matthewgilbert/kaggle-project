@@ -375,13 +375,13 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
     	print "CV %i: Test accuracy: %s" % (i, create_confidence_interval( cv_scores[:i], 0.95))        
     	if report_training:
             n_testing_data = testing_response.shape[0]
+            r_in = np.random.randint( training_data.shape[0], size = (n_testing_data) )
             try:
-                    training_location[0] = training_location[0][:n_testing_data] 
-            except:
-                    pass
-            
-            predict_args = [ training_data[:n_testing_data] ] + training_location        
-            training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[:n_testing_data], training_weights[:n_testing_data])
+                    training_location[0] = training_location[0].ix[r_in,:] 
+            except ValueError:
+                    break
+            predict_args = [ training_data.ix[r_in,:] ] + training_location        
+            training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[r_in], training_weights[r_in])
             print "CV %i: Train accuracy: %s" % (i, create_confidence_interval(training_scores[:i], 0.95) )
     	print "--------------------------------"
     	i += 1 
