@@ -333,7 +333,7 @@ def transform_data( dataframe ):
 
 
       
-def cv( model, data, response, weights, K=5, location_data = [], report_training=True):
+def cv( model, data, response, weights, K=5, location_data = [], report_training=True, ncpus=0):
     """
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
@@ -362,15 +362,33 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         	testing_location = []
 
         fit_args = [ training_data, training_response] + training_location
-    	predict_args = [ testing_data ] + testing_location	
+        model.fit( *fit_args )
 
-    	model.fit( *fit_args )
-    	prediction = model.predict( *predict_args )
-	
-	#try the James Stein stat
-#	prediction = JamesSteinStat( prediction, training_response.std()/4, training_response.mean() )	
+        if ncpus:
+            def doRun( model, predict_args):
+                print "in doRun"
+                return model.predict( *predict_args )
+             
+            sub_data = numpy.array_split( data, ncpus )
+            sub_location_data = numpy.array_split( location_data, ncpus)
+            results = []
+            job_server = pp.Server( ncpus, ppservers = () )
+            for i in range( ncpus ):
+                print i
+                nmodel = type(model)()
+                nmodel.__dict__  = model.__dict__.copy()
+                f = job_server.submit( doRun, args = (nmodel, (sub_data[i], sub_location[i]) ), modules=("numpy", "pandas") )
+                results.append( f() )
+                
+            prediction = np.concatenate( results )
+               
+        else:
+            predict_args = [ testing_data ] + testing_location
+            model.fit( *fit_args )
+            prediction = model.predict( *predict_args )
+        
     	cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
-	
+        
 
     	print "CV %i: Test accuracy: %s" % (i, create_confidence_interval( cv_scores[:i], 0.95))        
     	if report_training:
