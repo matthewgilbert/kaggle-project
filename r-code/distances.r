@@ -28,7 +28,7 @@ DistanceInfo <- function(train_locations, test_locations, numNearest, coreUse) {
     bins = nrow(test_locations)
     partition = bins/coreUse
 
-    int_closest_indices = matrix(NA,partition,nearest)
+    int_closest_indices = matrix(NA,partition,numNearest)
     int_max_distance = rep(NA, partition)
     closest_indices <- foreach(index=(1:coreUse), .combine=rbind) %dopar% {
                         j = 1
@@ -36,7 +36,7 @@ DistanceInfo <- function(train_locations, test_locations, numNearest, coreUse) {
                         upper_lim = partition*index
                         for(i in (lower_lim:upper_lim)) {
                             d = sqrt((x_train-xyz_testLocations[i,1])^2+(y_train-xyz_testLocations[i,2])^2+(z_train-xyz_testLocations[i,3])^2)
-                            int_closest_indices[j,] = order(d)[1:nearest]
+                            int_closest_indices[j,] = order(d)[1:numNearest]
                             int_max_distance[j] = sort(d, decreasing=TRUE)[1]
                             j = j+1
                         }
