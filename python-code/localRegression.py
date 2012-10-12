@@ -1,10 +1,10 @@
 import time
 
 import pandas
-import numpy
+import numpy as np
 from sklearn.linear_model import LinearRegression
+
 from sklearn.preprocessing import Scaler
-import pp
 import census_utilities
 import geoNN
 
@@ -26,16 +26,13 @@ class LocalRegression( object ):
     
     """
     
-    def __init__(self, k = 200, ncpus=1, parallel = False, feature_selection = False, regressor = LinearRegression, verbose=False, params={}, response_f = identity, inv_response_f = identity ):
-
+    def __init__(self, k = 200, feature_selection = False, regressor = LinearRegression, verbose=False, params={}, response_f = identity, inv_response_f = identity ):
         self.k = k           
-        self.ncpus = ncpus
-        self.parallel = parallel
         self.response_f = response_f
         self.inv_response_f = inv_response_f
-        self.zero_coef_ = numpy.zeros( 10000 )
+        self.zero_coef_ = np.zeros( 10000 )
         self.verbose = verbose
-        self.feature_selection = feature_selection
+	self.feature_selection = feature_selection
         self.selector = SelectPercentile( f_regression, 50 )
         #if regressor is a list of regressor, we need to initialize all of them
         if type( regressor ) == list:
@@ -61,26 +58,10 @@ class LocalRegression( object ):
         
         return self
         
+        
+        
     def predict( self, data, location_data):
-        if self.parallel:
-            #divide the data
-            sub_data = numpy.array_split( data, self.ncpus )
-            sub_location_data = numpy.array_split( location_data, self.ncpus)
-
-            results = []
-            job_server = pp.Server( self.ncpus, ppservers = () )
-            for i in range( self.ncpus ):
-                f = job_server.submit( self._predict, args =(self, sub_data[i], sub_location[i]), modules=("numpy", "pandas")    )
-                results.append( f() )
-                
-            #concatenate.
-            return numpy.concatenate( results )
-            
-            
-        else:
-            return self._predict( data, location_data)
-            
-    def _predict( self, data, location_data):
+        
         if location_data.shape[0] != data.shape[0]:
             raise Exception("length of first argument does not equal length of second argument.")
         
@@ -91,11 +72,13 @@ class LocalRegression( object ):
             pass
         #reg = self.regressor(**self.params)
         prediction = np.zeros( n)
-
         location_data = location_data.values
-        for i in range(n):    
+        for i in range(n):
+            if ( self.verbose and i%100 == 0):
+                print i
+                
             location = location_data[i,:] 
-            if numpy.any( pandas.isnull( location ) ):
+            if np.any( pandas.isnull( location ) ):
                 prediction[i] =  self.response_.mean()    
             else:
                 inx = self.gnn.find( location[0], location[1], self.k )
@@ -108,11 +91,10 @@ class LocalRegression( object ):
                     reg.fit(  sub_data , sub_response )
                 
                 try:
-                    self.zero_coef_[ numpy.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
+                    self.zero_coef_[ np.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
                 except:
                     pass
                 #take the average 
-
                 prediction[i] = np.array(  [ reg.predict( to_predict ) for reg in self.regressor] ).mean()
         #make sure everything is inside [0-100]
         prediction = self.inv_response_f( prediction )
@@ -120,5 +102,3 @@ class LocalRegression( object ):
         prediction[ prediction < 0 ] = 4
         return prediction                
                 
-
-    
