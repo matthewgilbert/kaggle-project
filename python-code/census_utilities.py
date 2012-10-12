@@ -362,7 +362,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         	testing_location = []
 
         fit_args = [ training_data, training_response] + training_location
-    	predict_args = [ testing_data ] + testing_location	
+    	predict_args = [ testing_data ] + testing_location	+ [testing_weights]
 
     	model.fit( *fit_args )
     	prediction = model.predict( *predict_args )
@@ -380,7 +380,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
                     training_location[0] = training_location[0].ix[r_in,:] 
             except ValueError:
                     break
-            predict_args = [ training_data.ix[r_in,:] ] + training_location        
+            predict_args = [ training_data.ix[r_in,:] ] + training_location  + [training_weights.ix[r_in,:]  ] 
             training_scores[i-1] = WMAEscore( model.predict( *predict_args  ), training_response[r_in], training_weights[r_in])
             print "CV %i: Train accuracy: %s" % (i, create_confidence_interval(training_scores[:i], 0.95) )
     	print "--------------------------------"

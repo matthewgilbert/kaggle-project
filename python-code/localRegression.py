@@ -60,7 +60,7 @@ class LocalRegression( object ):
         
         
         
-    def predict( self, data, location_data):
+    def predict( self, data, location_data, weights):
         
         if location_data.shape[0] != data.shape[0]:
             raise Exception("length of first argument does not equal length of second argument.")
@@ -73,32 +73,49 @@ class LocalRegression( object ):
         #reg = self.regressor(**self.params)
         prediction = np.zeros( n)
         location_data = location_data.values
+        weights = weights.value
+        argweights_sorted = np.argsort( weights )
         for i in range(n):
             if ( self.verbose and i%100 == 0):
                 print i
-                
-            location = location_data[i,:] 
-            if np.any( pandas.isnull( location ) ):
-                prediction[i] =  self.response_.mean()    
-            else:
-                inx = self.gnn.find( location[0], location[1], self.k )
-		sub_data = self.data_[inx,:]
-		sub_response = self.response_f( self.response_[inx,:] )
-		if self.feature_selection:
-			sub_data = self.selector.fit_transform( self.data_[inx,:], sub_response )
-			to_predict = self.selector.transform( data[i,:] )
-                for reg in self.regressor:    
-                    reg.fit(  sub_data , sub_response )
-                
-                try:
-                    self.zero_coef_[ np.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
-                except:
-                    pass
-                #take the average 
-                prediction[i] = np.array(  [ reg.predict( to_predict ) for reg in self.regressor] ).mean()
+            #how many estimators should we make, proptional to the percentile of the weight.
+            #naive scheme:
+            n_estimators = self.naive_n_estimators( i, argweights_sorted)
+            location = location_data[i,:]
+            sub_predictions = np.zeros( n_estimators)
+            for n_est in range(n_estimators):
+                if np.any( pandas.isnull( location ) ):
+                    sub_predictions[i] =  self.response_.mean()    
+                else:
+                    inx = self.gnn.find( location[0], location[1], self.k/(n_est + 1) )
+                    sub_data = self.data_[inx,:]
+                    sub_response = self.response_f( self.response_[inx,:] )
+                    if self.feature_selection:
+                        sub_data = self.selector.fit_transform( self.data_[inx,:], sub_response )
+                        to_predict = self.selector.transform( data[i,:] )
+                    for reg in self.regressor:    
+                        reg.fit(  sub_data , sub_response )
+                    try:
+                        self.zero_coef_[ np.nonzero( abs(reg.coef_) < .000001 )[0] ] += 1	
+                    except:
+                        pass
+                    #take the average 
+                    sub_predictions[i] = np.array(  [ reg.predict( to_predict ) for reg in self.regressor] ).mean()
+                    
+            prediction[i] = sub_predictions.mean()
         #make sure everything is inside [0-100]
         prediction = self.inv_response_f( prediction )
         prediction[ prediction > 100 ] = 99	
         prediction[ prediction < 0 ] = 4
         return prediction                
                 
+    
+    
+    def naive_n_estimators(self, i, argweights_sorted):
+        """returns the deci-percentile plus 1, i.e. if the weight is the 86th percentile, return 9"""
+        n= int( float( argweights_sorted[i] )/len( argweights_sorted) *10 ) + 1
+        print n
+        return n
+    
+    def trivial_n_estimators(self, i, argweights_sorted):
+        return 1
