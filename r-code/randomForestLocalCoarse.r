@@ -26,7 +26,8 @@ distance.info = DistanceInfo(train_locations, test_locations, numNearest, coreUs
 closest_indices = distance.info[[1]]
 
 #train local random forests and make predictions base on these
-predictions = data.frame("x"=rep(NA,nrow(test_locations)))
+bins = nrow(test_locations)
+partition = bins/coreUse
 int_predictions = rep(NA,partition)
 predictions <- foreach(index = (1:coreUse), .combine=c, .packages='randomForest') %dopar% {
                 j = 1
