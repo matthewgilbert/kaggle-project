@@ -20,7 +20,7 @@ train_locations = data.frame("LATITUDE"=census.formatted.df$LATITUDE, "LONGITUDE
 test_locations = data.frame("LATITUDE"=test.census.formatted.df$LATITUDE, "LONGITUDE"=test.census.formatted.df$LONGITUDE)
 
 #Calculate the closest indices
-source(distances.r)
+source(~/kaggle-project/r-code/distances.r)
 numNearest = 1000
 distance.info = DistanceInfo(train_locations, test_locations, numNearest, coreUse)
 closest_indices = distance.info[[1]]

@@ -1,6 +1,5 @@
 DistanceInfo <- function(train_locations, test_locations, numNearest, coreUse) {
 
-    #STILL NEEDS TO BE TESTED
     #Takes in the locations of the training data, locations of the testing data,
     #the number of points in a neighborhood to look at, the number of cores to use
 
