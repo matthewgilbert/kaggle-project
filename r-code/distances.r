@@ -40,7 +40,7 @@ DistanceInfo <- function(train_locations, test_locations, numNearest, coreUse) {
                             int_max_distance[j] = sort(d, decreasing=TRUE)[1]
                             j = j+1
                         }
-                        closest_indices = cbind(int_closest_indices, max_distances)
+                        closest_indices = cbind(int_closest_indices, int_max_distances)
     }
     DistanceInfo = list(closest_indices[,1:(ncol(closest_indices)-1)], closest_indices[,ncol(closest_indices)])
 
