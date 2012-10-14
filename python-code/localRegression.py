@@ -73,7 +73,7 @@ class LocalRegression( object ):
         #reg = self.regressor(**self.params)
         prediction = np.zeros( n)
         location_data = location_data.values
-        weights = weights.value
+	weights = weights.values
         argweights_sorted = np.argsort( weights )
         for i in range(n):
             if ( self.verbose and i%100 == 0):
@@ -85,9 +85,9 @@ class LocalRegression( object ):
             sub_predictions = np.zeros( n_estimators)
             for n_est in range(n_estimators):
                 if np.any( pandas.isnull( location ) ):
-                    sub_predictions[i] =  self.response_.mean()    
+                    sub_predictions[n_est] =  self.response_.mean()    
                 else:
-                    inx = self.gnn.find( location[0], location[1], self.k/(n_est + 1) )
+                    inx = self.gnn.find( location[0], location[1], np.floor( (n_est)*np.random.randint(-40,40) + self.k  )  )
                     sub_data = self.data_[inx,:]
                     sub_response = self.response_f( self.response_[inx,:] )
                     if self.feature_selection:
@@ -100,7 +100,7 @@ class LocalRegression( object ):
                     except:
                         pass
                     #take the average 
-                    sub_predictions[i] = np.array(  [ reg.predict( to_predict ) for reg in self.regressor] ).mean()
+                    sub_predictions[n_est] = np.array(  [ reg.predict( to_predict ) for reg in self.regressor] ).mean()
                     
             prediction[i] = sub_predictions.mean()
         #make sure everything is inside [0-100]
@@ -114,7 +114,6 @@ class LocalRegression( object ):
     def naive_n_estimators(self, i, argweights_sorted):
         """returns the deci-percentile plus 1, i.e. if the weight is the 86th percentile, return 9"""
         n= int( float( argweights_sorted[i] )/len( argweights_sorted) *10 ) + 1
-        print n
         return n
     
     def trivial_n_estimators(self, i, argweights_sorted):
