@@ -46,8 +46,14 @@ class Blender( object):
 	   del self.model[name]
 	except KeyError:
 	   print "Model %s not in blender."%name
+
 	return
-	
+
+
+    def split_arrays( arrays_to_split, precompute_ix = None, test_fraction = 0.1 ):
+		
+
+ 	
  
     def fit(self, data, response, dict_of_additional_variables=None):
         """
@@ -72,10 +78,9 @@ class Blender( object):
 	ncpus = len( self.models )
 	job_server = pp.Server( ncpus, ppservers = () )
 	jobs = dict()
-
+	to_import = ("import numpy as np", "sklearn",  "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") 
 
         for name, model in sorted( self.models.iteritems() ):
-            start = clock()
             try:
                 model.fit( training_data, training_response, *dict_of_additional_variables[name]["train"] )
                 X[:, i] = model.predict( blend_data, *dict_of_additional_variables[name]["test"] )
@@ -83,13 +88,12 @@ class Blender( object):
             except (KeyError, TypeError):
 
 
-                jobs[name] = job_server.submit( self.pp_run,(model, training_data, training_response), (),("import numpy as np", "sklearn", "from sklearn.sparse import *",  "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") )
+                jobs[name] = job_server.submit( pp_run,(model, training_data, training_response), (), to_import )
 		#model.fit( training_data, training_response)
                 #X[:, i] = model.predict( blend_data )
             i+=1
-            if self.verbose:
-                print "Finished model %s. Took %.3f seconds."%(name, clock() - start)
-
+	    if self.verbose:
+		print "Model %s sent to cpu."%name
         
 	for name, model in sorted( self.models.iteritems() ):
 	    self.models[name] = jobs[name]()
@@ -110,9 +114,6 @@ class Blender( object):
             
         return self
            
-    def pp_run(self, model, training_data, training_response):
-	return model.fit( training_data, training_response)
- 
     def predict( self, data, dict_of_additional_variables=None):
         
         X = np.zeros( (data.shape[0], len( self.models ) ) )
@@ -125,5 +126,6 @@ class Blender( object):
         return self.blender.predict( X )
         
 
-
+def pp_run( model, training_data, training_response):
+	return model.fit( training_data, training_response)
         
