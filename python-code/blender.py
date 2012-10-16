@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.cross_validation import train_test_split
 from time import clock
-
+import pp
 
 class Blender( object):
     """
@@ -66,6 +66,14 @@ class Blender( object):
             print "Shape of training data vs blending data: ", training_data.shape, blend_data.shape 
         #train the models.
         i = 0
+	
+
+	#try some parrallel
+	ncpus = len( self.models )
+	job_server = pp.Server( ncpus, ppservers = () )
+	jobs = dict()
+
+
         for name, model in sorted( self.models.iteritems() ):
             start = clock()
             try:
@@ -73,13 +81,19 @@ class Blender( object):
                 X[:, i] = model.predict( blend_data, *dict_of_additional_variables[name]["test"] )
                 
             except (KeyError, TypeError):
-                model.fit( training_data, training_response)
-                X[:, i] = model.predict( blend_data )
+
+
+                jobs[name] = job_server.submit( self.pp_run,(model, training_data, training_response), (),("import numpy as np", "sklearn", "from sklearn.sparse import *",  "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") )
+		#model.fit( training_data, training_response)
+                #X[:, i] = model.predict( blend_data )
             i+=1
             if self.verbose:
                 print "Finished model %s. Took %.3f seconds."%(name, clock() - start)
 
-        #create a data matrix X of predictions.
+        
+	for name, model in sorted( self.models.iteritems() ):
+	    self.models[name] = jobs[name]()
+
         if self.verbose:
             print "Fitting finished, starting blending."
         
@@ -95,7 +109,10 @@ class Blender( object):
             print "Done fitting"
             
         return self
-            
+           
+    def pp_run(self, model, training_data, training_response):
+	return model.fit( training_data, training_response)
+ 
     def predict( self, data, dict_of_additional_variables=None):
         
         X = np.zeros( (data.shape[0], len( self.models ) ) )
@@ -107,4 +124,6 @@ class Blender( object):
 	    i+=1	
         return self.blender.predict( X )
         
+
+
         
