@@ -107,7 +107,7 @@ def preprocess_dataframe( dataframe, training=1 ):
     location_data = dataframe[ ['LATITUDE', 'LONGITUDE'] ] 
     if training:
     	response = dataframe['Mail_Return_Rate_CEN_2010']
-    	weights = dataframe['weight']
+    weights = dataframe['weight']
  
     
     to_remove = ['TEA_Mail_Out_Mail_Back_CEN_2010','TEA_Update_Leave_CEN_2010', 'BILQ_Mailout_count_CEN_2010', 'Mail_Return_Rate_CEN_2010', 'State', 'State_name', 'County_name', 
@@ -362,7 +362,7 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
         	testing_location = []
 
         fit_args = [ training_data, training_response] + training_location
-    	predict_args = [ testing_data ] + testing_location	+ [testing_weights]
+    	predict_args = [ testing_data ] + testing_location + [training_weights]
 
     	model.fit( *fit_args )
     	prediction = model.predict( *predict_args )
@@ -405,10 +405,13 @@ def create_confidence_interval( array, alpha):
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
-    v =  (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
-    ix = bn.argpartsort( v, K, axis=None)[:K]
-    ix2 =ix[ np.nonzero( v[ix] < 100)]
-    ix2 = np.append( ix2, np.random.randint(0, location_data.shape[0], (1, K - ix2.shape[0] )  )  )
+    v = (( location_data - np.array( [lat, long] )  )**2).sum(axis=1)
+    ix2 = bn.argpartsort( v, K, axis=None)[:K]
+    #print ix
+    #ix2 =ix[ np.nonzero( v[ix] < 100)]
+    #ix2 = np.append( ix2, np.random.randint(0, location_data.shape[0], (1, K - ix2.shape[0] )  )  )
+    
+    #print ix2
     return ix2
     
 def JamesSteinStat( predictions, global_std, global_mean ):

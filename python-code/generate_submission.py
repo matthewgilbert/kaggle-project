@@ -39,13 +39,13 @@ print "Shape: ", training_data.shape
 from sklearn.ensemble import RandomForestRegressor as rfr
 
 #lr = lclR.LocalRegression(k = 1000, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = SmartSVR, params = {'gamma':0.0001})
-lr = lclR.LocalRegression(k = 800, feature_selection=True, response_f = lambda x: np.arcsin(x/100), inv_response_f=lambda x:100*np.sin(x), regressor = rfr, params = {'n_jobs':32, 'n_estimators':99})
-
+lr = lclR.LocalRegression(k = 1000, regressor = sklm.ElasticNet, params = {'alpha':0.001})
 lr.fit( training_data, training_response, training_location_data )
-prediction = lr.predict( test_data, test_location_data )
+print "begin prediction"
+prediction = lr.predict( test_data, test_location_data, test_weights )
 #remove >100s and <0s
 #prediction[ prediction > 100 ] = 99
 #prediction[ prediction < 0 ] = 5
-np.savetxt( "RFR100HIGHFRUCTOSEestimators.csv", prediction, delimiter= "," )
+np.savetxt( "ElasticNetOct15estimators.csv", prediction, delimiter= "," )
 print " COMPLETE." 
 

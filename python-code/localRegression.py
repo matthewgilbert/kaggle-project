@@ -60,7 +60,7 @@ class LocalRegression( object ):
         
         
         
-    def predict( self, data, location_data, weights):
+    def predict( self, data, location_data, weights=None):
         
         if location_data.shape[0] != data.shape[0]:
             raise Exception("length of first argument does not equal length of second argument.")
@@ -73,6 +73,7 @@ class LocalRegression( object ):
         #reg = self.regressor(**self.params)
         prediction = np.zeros( n)
         location_data = location_data.values
+	
 	weights = weights.values
         argweights_sorted = np.argsort( weights )
         for i in range(n):
@@ -80,7 +81,7 @@ class LocalRegression( object ):
                 print i
             #how many estimators should we make, proptional to the percentile of the weight.
             #naive scheme:
-            n_estimators = self.naive_n_estimators( i, argweights_sorted)
+            n_estimators = self.trivial_n_estimators( i, argweights_sorted)
             location = location_data[i,:]
             sub_predictions = np.zeros( n_estimators)
             for n_est in range(n_estimators):
@@ -90,6 +91,7 @@ class LocalRegression( object ):
                     inx = self.gnn.find( location[0], location[1], np.floor( (n_est)*np.random.randint(-40,40) + self.k  )  )
                     sub_data = self.data_[inx,:]
                     sub_response = self.response_f( self.response_[inx,:] )
+		    to_predict = data[i,:]
                     if self.feature_selection:
                         sub_data = self.selector.fit_transform( self.data_[inx,:], sub_response )
                         to_predict = self.selector.transform( data[i,:] )
