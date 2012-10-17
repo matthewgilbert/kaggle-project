@@ -38,7 +38,7 @@ class Blender( object):
         """
 	self._n_models +=1
         if not name:
-            name = "%d"%(len(self._n_models )
+            name = "%d"%( self._n_models )
         self.models[name] = model
         return
         
@@ -82,16 +82,11 @@ class Blender( object):
 	
 	
 	#try some parrallel
-	ncpus = len( self.models )
+	ncpus = max( len( self.models ), 32 )
 	job_server = pp.Server( ncpus, ppservers = () )
 	jobs = dict()
 	to_import = ("import numpy as np", "sklearn", "time", "from localRegression import *", "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") 
         for name, model in sorted( self.models.iteritems() ):
-            #try:
-            #    model.fit( training_data, training_response, *dict_of_additional_variables[name]["train"] )
-            #    X[:, i] = model.predict( blend_data, *dict_of_additional_variables[name]["test"] )
-                
-            #except (KeyError, TypeError):
 		
 		try:
 			fitargs = [ training_data, training_response] + [ array[train_ix] for array in dict_of_additional_variables[name ]] 
@@ -123,20 +118,39 @@ class Blender( object):
         
         if self.verbose:
             print "Done fitting"
-            
+        job_server.destroy()    
         return self
            
-    def predict( self, data, dict_of_additional_variables=None):
+    def predict( self, data, dict_of_additional_variables={}):
         
-        X = np.zeros( (data.shape[0], len( self.models ) ) )
+	ncpus = max( len( self.models ), 32 )
+	job_server = pp.Server( ncpus, ppservers = () )
+	jobs = dict()
+	to_import = ("import numpy as np", "sklearn", "time", "from localRegression import *", "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") 
+        for name, model in sorted( self.models.iteritems() ):
+		try:
+			predictargs = [data] +  dict_of_additional_variables[name]
+		except KeyError:	
+			predictargs = [ data ] 
+
+		jobs[name] = job_server.submit( pp_predict, (model, name, self.verbose, predictargs), (), to_import)
+
+	X = np.zeros( (data.shape[0], len( self.models ) ) )
         i = 0
         for name, model in sorted( self.models.iteritems() ):
-            X[:,i] = model.predict( data )
-            if self.verbose:
-                print "Finished model %s."%(name)
+            X[:,i] = jobs[name]()
 	    i+=1	
+	job_server.destroy()
         return self.blender.predict( X )
         
+
+
+def pp_predict( model, name, verbose, predictargs):
+	start = time.clock()
+	p = model.predict( *predictargs )
+	if verbose:
+		print "Model %s fitted, took %.2f seconds"%(name, time.clock() - start )
+	return p
 
 def pp_run( model, name, verbose, fitargs, predictargs):
 	
