@@ -1,7 +1,7 @@
 
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import ShuffleSplit
 from time import clock
 import pp
 
@@ -27,7 +27,7 @@ class Blender( object):
             self.training_fraction = training_fraction
             self.verbose = verbose
             self.models = dict()
-            
+            self._n_models = 0
     
     
     def add_model(self, model, name=None):
@@ -36,26 +36,31 @@ class Blender( object):
             name: a name to specify the model, eg "ElNet500alpha"
         
         """
+	self._n_models +=1
         if not name:
-            name = "%d"%(len(self.models) +1 )
+            name = "%d"%(len(self._n_models )
         self.models[name] = model
         return
         
     def del_model(self, name ):
 	try:	
-	   del self.model[name]
+	   del self.models[name]
 	except KeyError:
 	   print "Model %s not in blender."%name
 
 	return
 
 
-    def split_arrays( arrays_to_split, precompute_ix = None, test_fraction = 0.1 ):
-		
+    def split_arrays(self, n,  test_fraction = 0.1 ):
+	
+	
+	shfSplt = ShuffleSplit( n=n, n_iterations=1, test_size = test_fraction)
+	train_ix, test_ix = shfSplt.__iter__().next()
+	return train_ix, test_ix
 
  	
  
-    def fit(self, data, response, dict_of_additional_variables=None):
+    def fit(self, data, response, dict_of_additional_variables={}):
         """
             data: the data matix, shape (n,d)
             response: the response vector (n,)
@@ -64,39 +69,46 @@ class Blender( object):
                         {"train":[ items to be included in training], "test":[items to be included in testing] }
         """
         
-        #split the data to held-in and held-out. 
-        training_data, blend_data, training_response, blend_response = train_test_split( data, response, test_size = 1- self.training_fraction)
+        #split the data to held-in and held-out.
+	train_ix, blend_ix = self.split_arrays( data.shape[0], test_fraction = 1- self.training_fraction )
+	training_data, blend_data, training_response, blend_response = data[train_ix], data[blend_ix], response[train_ix], response[blend_ix]	
+
+ 
         X = np.zeros( (blend_response.shape[0], len( self.models ) ) )
 
         if self.verbose:
             print "Shape of training data vs blending data: ", training_data.shape, blend_data.shape 
-        #train the models.
-        i = 0
+        #train the models
 	
-
+	
 	#try some parrallel
 	ncpus = len( self.models )
 	job_server = pp.Server( ncpus, ppservers = () )
 	jobs = dict()
-	to_import = ("import numpy as np", "sklearn",  "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") 
-
+	to_import = ("import numpy as np", "sklearn", "time", "from localRegression import *", "from sklearn.linear_model import sparse", "from sklearn.utils import atleast2d_or_csc") 
         for name, model in sorted( self.models.iteritems() ):
-            try:
-                model.fit( training_data, training_response, *dict_of_additional_variables[name]["train"] )
-                X[:, i] = model.predict( blend_data, *dict_of_additional_variables[name]["test"] )
+            #try:
+            #    model.fit( training_data, training_response, *dict_of_additional_variables[name]["train"] )
+            #    X[:, i] = model.predict( blend_data, *dict_of_additional_variables[name]["test"] )
                 
-            except (KeyError, TypeError):
+            #except (KeyError, TypeError):
+		
+		try:
+			fitargs = [ training_data, training_response] + [ array[train_ix] for array in dict_of_additional_variables[name ]] 
+			predictargs = [ blend_data ] + [ array[blend_ix] for array in dict_of_additional_variables[name] ]
+		except KeyError:
+			fitargs = [ training_data , training_response]
+			predictargs = [ blend_data ]
+                
+		jobs[name] = job_server.submit( pp_run,(model, name, self.verbose, fitargs, predictargs), (), to_import )
 
-
-                jobs[name] = job_server.submit( pp_run,(model, training_data, training_response), (), to_import )
-		#model.fit( training_data, training_response)
-                #X[:, i] = model.predict( blend_data )
-            i+=1
-	    if self.verbose:
-		print "Model %s sent to cpu."%name
+	    	if self.verbose:
+			print "Model %s sent to cpu."%name
         
+	i = 0
 	for name, model in sorted( self.models.iteritems() ):
-	    self.models[name] = jobs[name]()
+	    self.models[name], X[:,i]  = jobs[name]()
+	    i+=1
 
         if self.verbose:
             print "Fitting finished, starting blending."
@@ -126,6 +138,11 @@ class Blender( object):
         return self.blender.predict( X )
         
 
-def pp_run( model, training_data, training_response):
-	return model.fit( training_data, training_response)
-        
+def pp_run( model, name, verbose, fitargs, predictargs):
+	
+	start = time.clock()
+	model.fit(*fitargs)
+        if verbose:
+		print "Model %s fitted, took %.2f seconds."%(name, time.clock() - start )
+	prediction = model.predict( *predictargs ) 
+	return model, prediction
