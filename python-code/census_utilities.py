@@ -66,27 +66,25 @@ def generate_features( dataframe ):
     dataframe["RURAL_POP_CEN_2*Hispanic_CEN_20"] = dataframe["RURAL_POP_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["RURAL_POP_CEN_2*Prs_Blw_Pov_Lev"] = np.sqrt( dataframe["RURAL_POP_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Prs_Blw_Pov_Lev_ACS_06_10/Tot_Population_ACS_06_10"] )
     dataframe["Females_CEN_201*2000_response"] = dataframe["Females_CEN_2010/Tot_Population_CEN_2010"]*dataframe["2000_response"]
-    #dataframe["Pop_under_5_CEN*Pop_18_24_CEN_2"] = dataframe["Pop_under_5_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]
-    dataframe["Pop_18_24_CEN_2*NH_Blk_alone_CE"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]
-    dataframe["Pop_18_24_CEN_2*NH_SOR_alone_CE"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"]
-    dataframe["Pop_18_24_CEN_2*Pov_Univ_ACS_06"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Pov_Univ_ACS_06_10/Tot_Population_ACS_06_10"]
-    dataframe["Pop_18_24_CEN_2*Tot_Prns_in_HHD"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]
-    dataframe["Pop_18_24_CEN_2*Renter_Occp_HU_"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Renter_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"]
-    dataframe["Pop_18_24_CEN_2*MLT_U2_9_STRC_A"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    dataframe["sqrtPop_18_24_CEN_2*NH_Blk_alone_CE"] = np.sqrt(dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"])
+    dataframe["sqrtPop_18_24_CEN_2*NH_SOR_alone_CE"] = np.sqrt(dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"])
+    dataframe["sqrtPop_18_24_CEN_2*Pov_Univ_ACS_06"] = np.sqrt(dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Pov_Univ_ACS_06_10/Tot_Population_ACS_06_10"] )
+    dataframe["sqrtPop_18_24_CEN_2*Tot_Prns_in_HHD"] = np.sqrt(dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"])
+    dataframe["sqrtPop_18_24_CEN_2*Renter_Occp_HU_"] = np.sqrt(dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Renter_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"])
+    dataframe["sqrtPop_18_24_CEN_2*MLT_U2_9_STRC_A"] = np.sqrt(dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"])
     dataframe["Pop_25_44_CEN_2*Female_No_HB_CE"] = dataframe["Pop_25_44_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Female_No_HB_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["Pop_65plus_CEN_*2000_response"] = dataframe["Pop_65plus_CEN_2010/Tot_Population_CEN_2010"]*dataframe["2000_response"]
     dataframe["Hispanic_CEN_20*NH_White_alone_"] = dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]
-    #dataframe["Hispanic_CEN_20*Tot_Vacant_Unit"] = dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]*(1-dataframe["Tot_Vacant_Units_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     dataframe["NH_White_alone_*NH_AIAN_alone_C"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_AIAN_alone_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["NH_White_alone_*Othr_Lang_ACS_0"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Othr_Lang_ACS_06_10/Tot_Population_ACS_06_10"]
-    dataframe["NH_White_alone_*College_ACS_06_"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["College_ACS_06_10/Pop_25yrs_Over_ACS_06_10"]
+    dataframe["sqrtNH_White_alone_*College_ACS_06_"] = np.sqrt( dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["College_ACS_06_10/Pop_25yrs_Over_ACS_06_10"])
     dataframe["NH_White_alone_*MrdCple_Fmly_HH"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["MrdCple_Fmly_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["NH_White_alone_*Owner_Occp_HU_C"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"]
-    dataframe["NH_Blk_alone_CE*NH_SOR_alone_CE"] = dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"]
-    dataframe["NH_Blk_alone_CE*MLT_U2_9_STRC_A"] = dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    dataframe["sqrtNH_Blk_alone_CE*NH_SOR_alone_CE"] = np.sqrt(dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"])
+    dataframe["sqrtNH_Blk_alone_CE*MLT_U2_9_STRC_A"] = np.sqrt(dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"])
     dataframe["NH_AIAN_alone_C*Med_HHD_Inc_TR_"] = dataframe["NH_AIAN_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Med_HHD_Inc_TR_ACS_06_10"]
-    dataframe["NH_SOR_alone_CE*Tot_Prns_in_HHD"] = dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]
-    dataframe["Othr_Lang_ACS_0*MLT_U2_9_STRC_A"] = dataframe["Othr_Lang_ACS_06_10/Tot_Population_ACS_06_10"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    dataframe["sqrtNH_SOR_alone_CE*Tot_Prns_in_HHD"] = np.sqrt(dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"])
+    dataframe["Othr_Lang_ACS_0*MLT_U2_9_STRC_A"] = np.sqrt(dataframe["Othr_Lang_ACS_06_10/Tot_Population_ACS_06_10"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"])
     dataframe["College_ACS_06_*Owner_Occp_HU_C"] = dataframe["College_ACS_06_10/Pop_25yrs_Over_ACS_06_10"]*dataframe["Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["Prs_Blw_Pov_Lev*Mobile_Homes_AC"] = dataframe["Prs_Blw_Pov_Lev_ACS_06_10/Tot_Population_ACS_06_10"]*dataframe["Mobile_Homes_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     dataframe["ENG_VW_INDO_EUR*HHD_PPL_Und_18_"] = dataframe["ENG_VW_INDO_EURO_ACS_06_10/Tot_Occp_Units_ACS_06_10"]*dataframe["HHD_PPL_Und_18_CEN_2010/Tot_Occp_Units_CEN_2010"]
@@ -94,7 +92,7 @@ def generate_features( dataframe ):
     dataframe["ENG_VW_INDO_EUR*MLT_U2_9_STRC_A"] = dataframe["ENG_VW_INDO_EURO_ACS_06_10/Tot_Occp_Units_ACS_06_10"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     dataframe["MrdCple_Fmly_HH*Sngl_Prns_HHD_C"] = dataframe["MrdCple_Fmly_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["Sngl_Prns_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["MrdCple_Fmly_HH*2000_response"] = dataframe["MrdCple_Fmly_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["2000_response"]
-    dataframe["Female_No_HB_CE*MLT_U2_9_STRC_A"] = dataframe["Female_No_HB_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    dataframe["sqrtFemale_No_HB_CE*MLT_U2_9_STRC_A"] = np.sqrt(dataframe["Female_No_HB_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["MLT_U2_9_STRC_ACS_06_10/Tot_Occp_Units_ACS_06_10"])
     dataframe["NonFamily_HHD_C*HHD_PPL_Und_18_"] = dataframe["NonFamily_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["HHD_PPL_Und_18_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["HHD_PPL_Und_18_*Mobile_Homes_AC"] = dataframe["HHD_PPL_Und_18_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["Mobile_Homes_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     dataframe["Tot_Prns_in_HHD*Renter_Occp_HU_"] = dataframe["Tot_Prns_in_HHD_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["Renter_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"]
@@ -110,21 +108,8 @@ def generate_features( dataframe ):
    
     dataframe["log(Single_UNIT_ACS)"] = np.log( dataframe["Single_Unit_ACS_06_10/Tot_Occp_Units_ACS_06_10"] +1)
     
-    dataframe["log(Pop_18_24_CEN_2*Renter_Occp_HU_)"] = np.log( dataframe["Pop_18_24_CEN_2*Renter_Occp_HU_"] + 1)
-    
-    
-    dataframe["sqrt(Female_No_HB_CE*MLT_U2_9_STRC_A)"] = np.sqrt( dataframe["Female_No_HB_CE*MLT_U2_9_STRC_A"] )
-    dataframe["sqrt(Othr_Lang_ACS_0*MLT_U2_9_STRC_A)"] = np.sqrt( dataframe["Othr_Lang_ACS_0*MLT_U2_9_STRC_A"] )
-    dataframe["sqrt(NH_Blk_alone_CE*MLT_U2_9_STRC_A)"] = np.sqrt( dataframe["NH_Blk_alone_CE*MLT_U2_9_STRC_A"] )
-    dataframe["sqrt(NH_Blk_alone_CE*NH_SOR_alone_CE)"] = np.sqrt( dataframe["NH_Blk_alone_CE*NH_SOR_alone_CE"] )
-    dataframe["sqrt(NH_SOR_alone_CE*Tot_Prns_in_HHD)"] = np.sqrt( dataframe["NH_SOR_alone_CE*Tot_Prns_in_HHD"] )
-    dataframe["sqrt(NH_White_alone_*College_ACS_06_)"] = np.sqrt( dataframe["NH_White_alone_*College_ACS_06_"] )
-    dataframe["sqrt(Pop_18_24_CEN_2*NH_Blk_alone_CE)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*NH_Blk_alone_CE"] )
-    dataframe["sqrt(Pop_18_24_CEN_2*NH_SOR_alone_CE)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*NH_SOR_alone_CE"] )
-    dataframe["sqrt(Pop_18_24_CEN_2*Pov_Univ_ACS_06)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*Pov_Univ_ACS_06"] )
-    dataframe["sqrt(Pop_18_24_CEN_2*Tot_Prns_in_HHD)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*Tot_Prns_in_HHD"] )
-    dataframe["sqrt(Pop_18_24_CEN_2*Renter_Occp_HU_)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*Renter_Occp_HU_"] )
-    dataframe["sqrt(Pop_18_24_CEN_2*MLT_U2_9_STRC_A)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*MLT_U2_9_STRC_A"] )
+    #dataframe["sqrt(Pop_18_24_CEN_2*Renter_Occp_HU_)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*Renter_Occp_HU_"] )
+    #dataframe["sqrt(Pop_18_24_CEN_2*MLT_U2_9_STRC_A)"] = np.sqrt( dataframe["Pop_18_24_CEN_2*MLT_U2_9_STRC_A"] )
     dataframe["sqrt(Built_Last_5_yrs_ACS_06_10/Tot_Occp_Units_ACS_06_10)"] = np.sqrt( dataframe["Built_Last_5_yrs_ACS_06_10/Tot_Occp_Units_ACS_06_10"] )
     dataframe["sqrt(No_Plumb_ACS_06_10/Tot_Occp_Units_ACS_06_10)"] = np.sqrt( dataframe["No_Plumb_ACS_06_10/Tot_Occp_Units_ACS_06_10"] )
     dataframe["sqrt(MLT_U10p_ACS_06_10/Tot_Occp_Units_ACS_06_10)"] = np.sqrt( dataframe["MLT_U10p_ACS_06_10/Tot_Occp_Units_ACS_06_10"] )
@@ -141,9 +126,12 @@ def generate_features( dataframe ):
     del dataframe["Mobile_Homes_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     del dataframe["Tot_Vacant_Units_CEN_2010/Tot_Occp_Units_CEN_2010"]
     del dataframe["Tot_Housing_Units_CEN_2010/Tot_Occp_Units_CEN_2010"]
-    
-    
-    
+    del dataframe["Single_Unit_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    del dataframe["No_Plumb_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    del dataframe["MLT_U10p_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    del dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]
+    del dataframe["Pop_65plus_CEN_2010/Tot_Population_CEN_2010"]
+    del dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]
     
     
     
