@@ -8,6 +8,30 @@ import bottleneck as bn
 import scipy.stats as stats
 
 
+
+
+
+
+def generate_metafeatures( data, location ):
+	
+	metadata = []
+	#location might be a good one
+	metadata.append( location["LATITUDE"] )
+	metadata.append( location["LONGITUDE"] )
+	
+	#is it a rural or urban location
+	metadata.append( data["URBANIZED_AREA_POP_CEN_2010/Tot_Population_CEN_2010"] < 0.5 ) 
+	#
+	
+	
+	
+	return np.concatenate( metadata, axis=1)
+
+
+
+
+
+
 def money2float(s):
    #Converts "$XXX, YYY" to XXXYYY. Fuck it, lets log it too.
     try:
@@ -41,7 +65,7 @@ def generate_features( dataframe ):
     dataframe["RURAL_POP_CEN_2*Hispanic_CEN_20"] = dataframe["RURAL_POP_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["RURAL_POP_CEN_2*Prs_Blw_Pov_Lev"] = dataframe["RURAL_POP_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Prs_Blw_Pov_Lev_ACS_06_10/Tot_Population_ACS_06_10"]
     dataframe["Females_CEN_201*2000_response"] = dataframe["Females_CEN_2010/Tot_Population_CEN_2010"]*dataframe["2000_response"]
-    dataframe["Pop_under_5_CEN*Pop_18_24_CEN_2"] = dataframe["Pop_under_5_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]
+    #dataframe["Pop_under_5_CEN*Pop_18_24_CEN_2"] = dataframe["Pop_under_5_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["Pop_18_24_CEN_2*NH_Blk_alone_CE"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_Blk_alone_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["Pop_18_24_CEN_2*NH_SOR_alone_CE"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_SOR_alone_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["Pop_18_24_CEN_2*Pov_Univ_ACS_06"] = dataframe["Pop_18_24_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Pov_Univ_ACS_06_10/Tot_Population_ACS_06_10"]
@@ -51,7 +75,7 @@ def generate_features( dataframe ):
     dataframe["Pop_25_44_CEN_2*Female_No_HB_CE"] = dataframe["Pop_25_44_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Female_No_HB_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["Pop_65plus_CEN_*2000_response"] = dataframe["Pop_65plus_CEN_2010/Tot_Population_CEN_2010"]*dataframe["2000_response"]
     dataframe["Hispanic_CEN_20*NH_White_alone_"] = dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]
-    dataframe["Hispanic_CEN_20*Tot_Vacant_Unit"] = dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Tot_Vacant_Units_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
+    #dataframe["Hispanic_CEN_20*Tot_Vacant_Unit"] = dataframe["Hispanic_CEN_2010/Tot_Population_CEN_2010"]*(1-dataframe["Tot_Vacant_Units_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     dataframe["NH_White_alone_*NH_AIAN_alone_C"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["NH_AIAN_alone_CEN_2010/Tot_Population_CEN_2010"]
     dataframe["NH_White_alone_*Othr_Lang_ACS_0"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["Othr_Lang_ACS_06_10/Tot_Population_ACS_06_10"]
     dataframe["NH_White_alone_*College_ACS_06_"] = dataframe["NH_White_alone_CEN_2010/Tot_Population_CEN_2010"]*dataframe["College_ACS_06_10/Pop_25yrs_Over_ACS_06_10"]
@@ -78,7 +102,11 @@ def generate_features( dataframe ):
     dataframe["Rel_Child_Under*Mobile_Homes_AC"] = dataframe["Rel_Child_Under_6_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["Mobile_Homes_ACS_06_10/Tot_Occp_Units_ACS_06_10"]
     dataframe["HHD_Moved_in_AC*Renter_Occp_HU_"] = dataframe["HHD_Moved_in_ACS_06_10/Tot_Occp_Units_ACS_06_10"]*dataframe["Renter_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"]
     dataframe["Owner_Occp_HU_C*2000_response"] = dataframe["Owner_Occp_HU_CEN_2010/Tot_Occp_Units_CEN_2010"]*dataframe["2000_response"]
+    
+    dataframe["Are_the_houses_expensive"] = dataframe["Med_House_Val_BG_ACS_06_10"]/dataframe["Med_house_val_tr_ACS_06_10"]
+    dataframe["Are_the_families_rich"] = dataframe["Med_HHD_Inc_BG_ACS_06_10"]/dataframe["Med_HHD_Inc_TR_ACS_06_10"]
 
+   
     return dataframe
  
  
@@ -207,7 +235,7 @@ def transform_data( dataframe ):
         dataframe.rename( columns = { category: category + "/" + 'Tot_Population_ACS_06_10' }, inplace = True )        
     del dataframe['Tot_Population_ACS_06_10']  
               
-              
+    del dataframe["Rel_Family_HHD_ACS_06_10"]          
     del dataframe["Not_MrdCple_HHD_ACS_06_10"]   
     del dataframe["Tot_Prns_in_HHD_ACS_06_10"]   
     del dataframe["Owner_Occp_HU_ACS_06_10"]   
@@ -219,6 +247,7 @@ def transform_data( dataframe ):
     del dataframe["Female_No_HB_ACS_06_10"]
     del dataframe["Tot_Housing_Units_ACS_06_10"] 
     del dataframe["HHD_PPL_Und_18_ACS_06_10"]  
+    del dataframe["Tot_Vacant_Units_ACS_06_10"]
     #denominator is Tot_Occp_Units_ACS_06_10
     acs_households = dataframe["Tot_Occp_Units_ACS_06_10"].astype(np.float64)          
     acs_households_to_normalize = [
@@ -227,7 +256,7 @@ def transform_data( dataframe ):
                 "ENG_VW_API_ACS_06_10",
                 "ENG_VW_OTHER_ACS_06_10",
                 "ENG_VW_ACS_06_10",
-                "Rel_Family_HHD_ACS_06_10",
+                #"Rel_Family_HHD_ACS_06_10",
                 #"MrdCple_Fmly_HHD_ACS_06_10",
                 #"Not_MrdCple_HHD_ACS_06_10", 
                 #"Female_No_HB_ACS_06_10",
@@ -250,7 +279,7 @@ def transform_data( dataframe ):
                 "Occp_U_NO_PH_SRVC_ACS_06_10",
                 "No_Plumb_ACS_06_10", 
                 "Built_Last_5_yrs_ACS_06_10",
-                "Tot_Vacant_Units_ACS_06_10",
+                #"Tot_Vacant_Units_ACS_06_10",
                 "Aggr_House_Value_ACS_06_10",
                 ]
     for category in acs_households_to_normalize:
@@ -266,15 +295,17 @@ def transform_data( dataframe ):
     #we should reduce redundancy
     del dataframe['Males_CEN_2010']
     del dataframe['Non_Inst_GQ_CEN_2010']
-    
-    #census
+    del dataframe["URBAN_CLUSTER_POP_CEN_2010"]
+    del dataframe["Pop_under_5_CEN_2010"]	
+ 
+    #cenisus
     census_population = dataframe['Tot_Population_CEN_2010'].astype(np.float64)
     census_pop_to_normalize = [
         'URBANIZED_AREA_POP_CEN_2010',
-        'URBAN_CLUSTER_POP_CEN_2010',
+        #'URBAN_CLUSTER_POP_CEN_2010',
         'RURAL_POP_CEN_2010',
         'Females_CEN_2010',
-        'Pop_under_5_CEN_2010', 
+        #'Pop_under_5_CEN_2010', 
         'Pop_5_17_CEN_2010',
         'Pop_18_24_CEN_2010',
         'Pop_25_44_CEN_2010',
@@ -401,7 +432,7 @@ def create_confidence_interval( array, alpha):
      mu = array.mean()
      ci_width = td.interval(alpha, n)[1]*array.std()/np.sqrt(n)	
      
-     return "%0.3f ( +- %0.3f)"%(mu, ci_width)	
+     return "%0.3f ( +/- %0.2f)"%(mu, ci_width)	
         
 def find_geo_NN( lat, long, location_data, K = 1 ):
     #location_data is a 2-d nx2 numpy array of lat-long coordinates.
