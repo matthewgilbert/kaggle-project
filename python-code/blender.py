@@ -148,7 +148,7 @@ def pp_predict( model, name, verbose, predictargs):
 	start = time.clock()
 	p = model.predict( *predictargs )
 	if verbose:
-		print "Model %s fitted, took %.2f seconds"%(name, time.clock() - start )
+		print "Model %s predictions complete, took %.2f seconds"%(name, time.clock() - start )
 	return p
 
 def pp_run( model, name, verbose, fitargs, predictargs):

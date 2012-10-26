@@ -6,7 +6,7 @@ import pandas
 from sklearn.cross_validation import KFold
 import bottleneck as bn
 import scipy.stats as stats
-
+import pdb
 
 
 
@@ -395,7 +395,7 @@ def transform_data( dataframe ):
 
 
       
-def cv( model, data, response, weights, K=5, location_data = [], report_training=True):
+def cv( model, data, response, weights, K=5, location_data = [], report_training=True, debug=False):
     """
     model is the scikitlearn model, with parameters already set. This is really to restrictive, eg: if I want to do preprocessing on the 
     cv'ed set, there is no good way.
@@ -432,8 +432,10 @@ def cv( model, data, response, weights, K=5, location_data = [], report_training
 	#try the James Stein stat
 #	prediction = JamesSteinStat( prediction, training_response.std()/4, training_response.mean() )	
     	cv_scores[i-1] = WMAEscore( prediction, testing_response, testing_weights ) 
+        print cv_scores[i-1]
+	if cv_scores[i-1]>5.5 and debug==True:
+		pdb.set_trace()		
 	
-
     	print "CV %i: Test accuracy: %s" % (i, create_confidence_interval( cv_scores[:i], 0.95))        
     	if report_training:
             n_testing_data = testing_response.shape[0]
